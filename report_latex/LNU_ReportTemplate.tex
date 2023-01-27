@@ -1,0 +1,199 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Arsclassica Article
+% LaTeX Template
+% Version 1.1 (1/8/17)
+%
+% This template has been downloaded from:
+% http://www.LaTeXTemplates.com
+%
+% Original author:
+% Lorenzo Pantieri (http://www.lorenzopantieri.net) with extensive modifications by:
+% Vel (vel@latextemplates.com)
+%
+% License:
+% CC BY-NC-SA 3.0 (http://creativecommons.org/licenses/by-nc-sa/3.0/)
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
+%----------------------------------------------------------------------------------------
+\documentclass[
+11pt, % Main document font size
+a4paper, % Paper type, use 'letterpaper' for US Letter paper
+oneside, % One page layout (no page indentation)
+%twoside, % Two page layout (page indentation for binding and different headers)
+headinclude,footinclude, % Extra spacing for the header and footer
+BCOR5mm, % Binding correction
+]{scrartcl}
+
+% configuration file where all the packages are loaded and set up
+% commands new/redefined are done in here
+\input{config.tex} % Include the structure.tex file which specified the document structure and layout
+
+\hyphenation{Fortran hy-phen-ation} % Specify custom hyphenation points in words with dashes where you would like hyphenation to occur, or alternatively, don't put any dashes in a word to stop hyphenation altogether
+
+
+
+%----------------------------------------------------------------------------------------
+%	DOCUMENT VARIABLES
+%	Fill in the lines below to update the thesis template
+%	If you wish to cite each of the variables defined below, look at the
+%	section above for the citation command e.g. \examiner{} below is
+%	defined as \examname above so you cite it as \examname
+%----------------------------------------------------------------------------------------
+
+\documenttype{Technical Report} %The document type
+%-------------------------------------------------  
+\reporttitle{Title of the report} % Your reoprt title - this is used in the title
+%-------------------------------------------------  
+\reportsubtitle{Subtitle of your report} %Subtitle of the report - this is used in the titlepage
+%------------------------------------------------- 
+\professor{Fredrik \textsc{Ahlgren}} % You supervisor's name (professor that holds the course)- this is used in the title page
+%-------------------------------------------------   
+\coursename{Project with Embedded System} %The course name
+%------------------------------------------------- 
+\coursecode{2DT304} %The course code
+%------------------------------------------------- 
+\semester{VT23} %The semester code of the course
+%------------------------------------------------- 
+
+
+\authors{Olof \textsc{Enström}} % Your name and surname- this is used in the title page and abstract
+\email{oe222fh@student.lnu.se} %the author's email
+%-------------------------------------------------
+
+% Uncomment the following two lines if there is the second author also
+% If there is a second authour, uncomment also the respective lines in the tile page
+\authorssecond{Christoffer \textsc{Eid}} % name and surname of the second author- this is used in the title page and abstract
+\emailsecond{ce223af@student.lnu.se} %the second author's email
+%-------------------------------------------------
+
+\date{} % An optional date to appear under the author(s)
+
+
+
+%----------------------------------------------------------------------------------------
+
+\begin{document}
+
+%----------------------------------------------------------------------------------------
+%	TITLE PAGE
+%----------------------------------------------------------------------------------------
+%\maketitle % Print the title/author/date block
+
+% The new custom title page
+\begin{titlepage} % Suppresses displaying the page number on the title page and the subsequent page counts as page 1
+	
+	\newgeometry{top=6mm, bottom=15mm, left=50mm, right=10mm}
+	
+	\BgThispage
+	\raggedright
+	\hspace*{-0.03\textwidth} % Whitespace between the vertical line and title page text
+	\rule{0.5pt}{4cm} % Vertical line
+	\hspace{0.005\textwidth} % Whitespace between the vertical line and title page text
+	\fboxsep0pt
+	\parbox[b]{0.85\textwidth}{ % Paragraph box for holding the title page text, adjust the width to move the title page left or right on the page
+		{\huge \doctype}% Subtitle or further description
+	}
+	
+	\vspace{4cm}
+	
+	\begin{minipage}{0.85\textwidth}
+		{\Huge\bfseries \rtitle}\\[2\baselineskip] % Title
+		{\LARGE\textit{\rsubtitle}}% Subtitle or further description
+	\end{minipage}
+	
+	\vfill
+	
+	\raggedleft
+	\begin{flushright}
+		\vline
+		\hspace{0.005\textwidth} % Whitespace between the vertical line and title page text
+		\parbox[b]{0.45\textwidth}{ % Paragraph box for holding the title page text, adjust the width to move the title page left or right on the page
+		
+			{Author: \hfill\raggedleft\authorsname}\\ % Author name, lower case for consistent small caps
+			{email: \hfill \authorsemail}\\
+			%
+			% Uncomment these two following two lines if there is a second author
+			%
+			{Author: \hfill\raggedleft\authorssecondname}\\ % Author name, lower case for consistent small caps
+			{email: \hfill \authorssecondemail}\\
+			\vfill
+			{Professor: \hfill \profname}\\
+			{Course: \hfill \coursecod}\\ % Author name, lower case for consistent small caps
+			{Semester: \hfill \sem}\\	
+	 	}
+	\end{flushright}
+	
+	\restoregeometry
+\end{titlepage}
+
+
+
+
+%----------------------------------------------------------------------------------------
+%	HEADERS
+%----------------------------------------------------------------------------------------
+
+\renewcommand{\sectionmark}[1]{\markright{\spacedlowsmallcaps{#1}}} % The header for all pages (oneside) or for even pages (twoside)
+%\renewcommand{\subsectionmark}[1]{\markright{\thesubsection~#1}} % Uncomment when using the twoside option - this modifies the header on odd pages
+\lehead{\mbox{\llap{\small\thepage\kern1em\color{halfgray} \vline}\color{halfgray}\hspace{0.5em}\rightmark\hfil}} % The header style
+
+\pagestyle{scrheadings} % Enable the headers specified in this block
+
+
+%----------------------------------------------------------------------------------------
+%	TABLE OF CONTENTS & LISTS OF FIGURES AND TABLES
+%----------------------------------------------------------------------------------------
+\setcounter{tocdepth}{2} % Set the depth of the table of contents to show sections and subsections only
+
+\tableofcontents % Print the table of contents
+
+\clearpage
+
+%Comment these lines if you don't want the lists of figures and/or tables
+\listoffigures % Print the list of figures
+\listoftables % Print the list of tables
+\clearpage
+%----------------------------------------------------------------------------------------
+%	ABSTRACT
+%----------------------------------------------------------------------------------------
+
+%\section*{Abstract} % This section will not appear in the table of contents due to the star (\section*)
+
+%\lipsum[1] % Dummy text
+
+%----------------------------------------------------------------------------------------
+
+%\newpage % Start the article content on the second page, remove this if you have a longer abstract that goes onto the second page
+
+
+%----------------------------------------------------------------------------------------
+%	MAIN CONTENT OF YOUR WORK
+%----------------------------------------------------------------------------------------
+%
+% The command \input{filename} adds the content of the file "filename" in line
+% The command \include{filename} does a \clearpage before adding the content of the file "filename"
+%
+
+\input{./chapters/introduction.tex}
+\input{./chapters/methods.tex}
+\input{./chapters/results.tex}
+
+%clear the remaining space of the page and pushes the following content to the new page
+\clearpage
+
+
+%----------------------------------------------------------------------------------------
+%	BIBLIOGRAPHY
+%----------------------------------------------------------------------------------------
+\renewcommand{\refname}{\spacedlowsmallcaps{References}} % For modifying the bibliography heading
+
+\bibliographystyle{unsrt}
+
+\bibliography{bibliography.bib} % The file containing the bibliography
+
+%----------------------------------------------------------------------------------------
+
+\end{document}

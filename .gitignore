@@ -1,3 +1,9 @@
+# ESP-IDF
+**/.vscode/settings.json
+**/.vscode/c_cpp_properties.json
+**/managed_components/**/.component_hash
+**/build/
+
 # Created by https://www.toptal.com/developers/gitignore/api/linux,windows,latex,c++,visualstudiocode,c
 # Edit at https://www.toptal.com/developers/gitignore?templates=linux,windows,latex,c++,visualstudiocode,c
 

@@ -1,0 +1,1 @@
+void energy_gateway_start_provisioning(void);

@@ -99,6 +99,9 @@ static esp_err_t example_get_sec2_verifier(const char **verifier, uint16_t *veri
 const int WIFI_CONNECTED_EVENT = BIT0;
 static EventGroupHandle_t wifi_event_group;
 
+const int BLE_DISABLED_EVENT = BIT0;
+static EventGroupHandle_t ble_event_group;
+
 #define PROV_QR_VERSION         "v1"
 #define PROV_TRANSPORT_SOFTAP   "softap"
 #define PROV_TRANSPORT_BLE      "ble"
@@ -150,6 +153,10 @@ static void event_handler(void* arg, esp_event_base_t event_base,
                 /* De-initialize manager once provisioning is finished */
                 wifi_prov_mgr_deinit();
                 break;
+            case WIFI_PROV_DEINIT:
+                /* Bluetooth is disabled */
+                ESP_LOGI(TAG, "Bluetooth disabled!");
+                xEventGroupSetBits(ble_event_group, BLE_DISABLED_EVENT);
             default:
                 break;
         }
@@ -252,11 +259,13 @@ void energy_gateway_start_provisioning(void)
     /* Initialize the event loop */
     ESP_ERROR_CHECK(esp_event_loop_create_default());
     wifi_event_group = xEventGroupCreate();
+    ble_event_group = xEventGroupCreate();
 
     /* Register our event handler for Wi-Fi, IP and Provisioning related events */
     ESP_ERROR_CHECK(esp_event_handler_register(WIFI_PROV_EVENT, ESP_EVENT_ANY_ID, &event_handler, NULL));
     ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &event_handler, NULL));
     ESP_ERROR_CHECK(esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &event_handler, NULL));
+    ESP_ERROR_CHECK(esp_event_handler_register(WIFI_PROV_DEINIT, ESP_EVENT_ANY_ID, &event_handler, NULL));
 
     /* Initialize Wi-Fi including netif with default config */
     esp_netif_create_default_wifi_sta();
@@ -441,4 +450,7 @@ void energy_gateway_start_provisioning(void)
 
     /* Wait for Wi-Fi connection */
     xEventGroupWaitBits(wifi_event_group, WIFI_CONNECTED_EVENT, false, true, portMAX_DELAY);
+
+    /* Wait for BLE to disable */
+    xEventGroupWaitBits(ble_event_group, BLE_DISABLED_EVENT, false, true, portMAX_DELAY);
 }

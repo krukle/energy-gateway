@@ -69,21 +69,21 @@ void app_main(void)
     }
 #endif
 
-//     /* Ensure to disable any WiFi power save mode, this allows best throughput
-//      * and hence timings for overall OTA operation.
-//      */
+    // Ensure to disable any WiFi power save mode, this allows best throughput
+    // and hence timings for overall OTA operation.
     esp_wifi_set_ps(WIFI_PS_NONE);
 
 
     // Create a handle for the OTA task.
     // The handle is used to refer to the task later, e.g. to delete the task.
     TaskHandle_t otaTaskHandle = NULL;
-    xTaskCreate(&advanced_ota_example_task, "advanced_ota_example_task", 1024 * 8, NULL, 5, &otaTaskHandle);
-  //-----------------------------------------------------------------------------------------------------
+    BaseType_t otaTaskStatus = xTaskCreate(&advanced_ota_example_task, "advanced_ota_example_task", 1024 * 8, NULL, 5, &otaTaskHandle);
+    if (otaTaskStatus != pdPASS) {
+        ESP_LOGE(TAG, "Error creating OTA task! Error code: %d", otaTaskStatus);
+        return 1;
+    }
+    {
+        ESP_LOGI(TAG, "OTA task created successfully!");
+    }
 
-    // /* Start main application now */
-    // while (1) {
-    //     ESP_LOGI(TAG, "Hello World!");
-    //     vTaskDelay(1000 / portTICK_PERIOD_MS);
-    // }
 }

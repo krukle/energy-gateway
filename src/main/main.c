@@ -74,7 +74,11 @@ void app_main(void)
 //      */
     esp_wifi_set_ps(WIFI_PS_NONE);
 
-    xTaskCreate(&advanced_ota_example_task, "advanced_ota_example_task", 1024 * 8, NULL, 5, NULL);
+
+    // Create a handle for the OTA task.
+    // The handle is used to refer to the task later, e.g. to delete the task.
+    TaskHandle_t otaTaskHandle = NULL;
+    xTaskCreate(&advanced_ota_example_task, "advanced_ota_example_task", 1024 * 8, NULL, 5, &otaTaskHandle);
   //-----------------------------------------------------------------------------------------------------
 
     // /* Start main application now */

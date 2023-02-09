@@ -73,8 +73,9 @@ static esp_err_t _http_client_init_cb(esp_http_client_handle_t http_client)
     return err;
 }
 
-void advanced_ota_example_task(void *pvParameter)
+void advanced_ota_example_task( portMUX_TYPE *spinlock )
 {
+start:
     ESP_LOGI(TAG, "Starting Advanced OTA example");
 
     esp_err_t ota_finish_err = ESP_OK;
@@ -102,7 +103,7 @@ void advanced_ota_example_task(void *pvParameter)
     esp_err_t err = esp_https_ota_begin(&ota_config, &https_ota_handle);
     if (err != ESP_OK) {
         ESP_LOGE(TAG, "ESP HTTPS OTA Begin failed");
-        vTaskDelete(NULL);
+        // vTaskSuspend( NULL );
     }
 
     esp_app_desc_t app_desc;
@@ -132,22 +133,29 @@ void advanced_ota_example_task(void *pvParameter)
         // the OTA image was not completely received and user can customise the response to this situation.
         ESP_LOGE(TAG, "Complete data was not received.");
     } else {
+        // TODO: Make sure this is not interrupted by other tasks.
+        taskENTER_CRITICAL(spinlock);
         ota_finish_err = esp_https_ota_finish(https_ota_handle);
+        taskEXIT_CRITICAL(spinlock);
         if ((err == ESP_OK) && (ota_finish_err == ESP_OK)) {
             ESP_LOGI(TAG, "ESP_HTTPS_OTA upgrade successful. Rebooting ...");
             vTaskDelay(1000 / portTICK_PERIOD_MS);
             esp_restart();
         } else {
             if (ota_finish_err == ESP_ERR_OTA_VALIDATE_FAILED) {
+                // TODO: Send a message to server to indicate that the image is corrupted.
                 ESP_LOGE(TAG, "Image validation failed, image is corrupted");
             }
             ESP_LOGE(TAG, "ESP_HTTPS_OTA upgrade failed 0x%x", ota_finish_err);
-            vTaskDelete(NULL);
+            // vTaskSuspend(NULL);
         }
+
     }
 
 ota_end:
     esp_https_ota_abort(https_ota_handle);
     ESP_LOGE(TAG, "ESP_HTTPS_OTA upgrade failed");
-    vTaskDelete(NULL);
+    vTaskSuspend(NULL);
+    goto start;
+    // TODO: Maybe delete task instead of suspending it.
 }

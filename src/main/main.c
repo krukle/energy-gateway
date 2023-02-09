@@ -4,6 +4,8 @@
 #include "freertos/task.h"
 #include "freertos/event_groups.h"
 #include "esp_system.h"
+#include "esp_task_wdt.h"
+#include "esp_timer.h"
 #include "esp_event.h"
 #include "esp_log.h"
 #include "esp_ota_ops.h"
@@ -24,50 +26,40 @@
 #endif
 
 static const char *TAG = "main";
+static portMUX_TYPE spinlock = portMUX_INITIALIZER_UNLOCKED;
+static TaskHandle_t otaTaskHandle = NULL;
+
+void otaTimerCallback( TimerHandle_t pxTimer )
+{
+    ESP_LOGI("otaTimerCallback", "Task handle should be not null but is: %p", otaTaskHandle);
+    if (otaTaskHandle != NULL) {
+        ESP_LOGI("otaTimerCallback", "Resuming OTA task");
+        vTaskResume( otaTaskHandle );
+    }
+}
 
 void app_main(void)
 {
     energy_gateway_start_provisioning();
-//   ESP_LOGI(TAG, "OTA example app_main start");
-//     // Initialize NVS.
-//     esp_err_t err = nvs_flash_init();
-//     if (err == ESP_ERR_NVS_NO_FREE_PAGES || err == ESP_ERR_NVS_NEW_VERSION_FOUND) {
-//         // 1.OTA app partition table has a smaller NVS partition size than the non-OTA
-//         // partition table. This size mismatch may cause NVS initialization to fail.
-//         // 2.NVS partition contains data in new format and cannot be recognized by this version of code.
-//         // If this happens, we erase NVS partition and initialize NVS again.
-//         ESP_ERROR_CHECK(nvs_flash_erase());
-//         err = nvs_flash_init();
-//     }
-//     ESP_ERROR_CHECK( err );
 
-//     ESP_ERROR_CHECK(esp_netif_init());
-//     ESP_ERROR_CHECK(esp_event_loop_create_default());
-
-//     /* This helper function configures Wi-Fi or Ethernet, as selected in menuconfig.
-//      * Read "Establishing Wi-Fi or Ethernet Connection" section in
-//      * examples/protocols/README.md for more information about this function.
-//     */
-//     ESP_ERROR_CHECK(example_connect());
-
-#if defined(CONFIG_BOOTLOADER_APP_ROLLBACK_ENABLE)
-    /**
-     * We are treating successful WiFi connection as a checkpoint to cancel rollback
-     * process and mark newly updated firmware image as active. For production cases,
-     * please tune the checkpoint behavior per end application requirement.
-     */
-    const esp_partition_t *running = esp_ota_get_running_partition();
-    esp_ota_img_states_t ota_state;
-    if (esp_ota_get_state_partition(running, &ota_state) == ESP_OK) {
-        if (ota_state == ESP_OTA_IMG_PENDING_VERIFY) {
-            if (esp_ota_mark_app_valid_cancel_rollback() == ESP_OK) {
-                ESP_LOGI(TAG, "App is valid, rollback cancelled successfully");
-            } else {
-                ESP_LOGE(TAG, "Failed to cancel rollback");
+    #if defined(CONFIG_BOOTLOADER_APP_ROLLBACK_ENABLE)
+        /**
+         * We are treating successful WiFi connection as a checkpoint to cancel rollback
+         * process and mark newly updated firmware image as active. For production cases,
+         * please tune the checkpoint behavior per end application requirement.
+         */
+        const esp_partition_t *running = esp_ota_get_running_partition();
+        esp_ota_img_states_t ota_state;
+        if (esp_ota_get_state_partition(running, &ota_state) == ESP_OK) {
+            if (ota_state == ESP_OTA_IMG_PENDING_VERIFY) {
+                if (esp_ota_mark_app_valid_cancel_rollback() == ESP_OK) {
+                    ESP_LOGI(TAG, "App is valid, rollback cancelled successfully");
+                } else {
+                    ESP_LOGE(TAG, "Failed to cancel rollback");
+                }
             }
         }
-    }
-#endif
+    #endif
 
     // Ensure to disable any WiFi power save mode, this allows best throughput
     // and hence timings for overall OTA operation.
@@ -76,14 +68,35 @@ void app_main(void)
 
     // Create a handle for the OTA task.
     // The handle is used to refer to the task later, e.g. to delete the task.
-    TaskHandle_t otaTaskHandle = NULL;
-    BaseType_t otaTaskStatus = xTaskCreate(&advanced_ota_example_task, "advanced_ota_example_task", 1024 * 8, NULL, 5, &otaTaskHandle);
+    ESP_LOGI(TAG, "Task handle should be null but is: %p", otaTaskHandle);
+    BaseType_t otaTaskStatus = xTaskCreate(&advanced_ota_example_task, "advanced_ota_example_task", 1024 * 8, &spinlock, 5, &otaTaskHandle);
+    ESP_LOGI(TAG, "Task handle should be not null but is: %p", otaTaskHandle);
     if (otaTaskStatus != pdPASS) {
         ESP_LOGE(TAG, "Error creating OTA task! Error code: %d", otaTaskStatus);
-        return 1;
-    }
+        // TODO: Handle error.
+    } else
     {
         ESP_LOGI(TAG, "OTA task created successfully!");
     }
 
+
+    TimerHandle_t otaTimerHandle = xTimerCreate("otaTimer", pdMS_TO_TICKS(1000*20), pdTRUE, (void*)1, otaTimerCallback);
+    if (otaTimerHandle == NULL)
+    {
+        ESP_LOGE(TAG, "Error creating OTA timer!");
+    }
+    else
+    {
+        ESP_LOGI(TAG, "OTA timer created successfully!");
+        BaseType_t timerStartState = xTimerStart(otaTimerHandle, 0);
+        if (timerStartState != pdPASS)
+        {
+            ESP_LOGE(TAG, "Error starting OTA timer!");
+            // TODO: Handle error.
+        }
+        else
+        {
+            ESP_LOGI(TAG, "OTA timer started successfully!");
+        }
+    }
 }

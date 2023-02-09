@@ -103,7 +103,7 @@ start:
     esp_err_t err = esp_https_ota_begin(&ota_config, &https_ota_handle);
     if (err != ESP_OK) {
         ESP_LOGE(TAG, "ESP HTTPS OTA Begin failed");
-        // vTaskSuspend( NULL );
+        goto end;
     }
 
     esp_app_desc_t app_desc;
@@ -147,7 +147,7 @@ start:
                 ESP_LOGE(TAG, "Image validation failed, image is corrupted");
             }
             ESP_LOGE(TAG, "ESP_HTTPS_OTA upgrade failed 0x%x", ota_finish_err);
-            // vTaskSuspend(NULL);
+            goto end;
         }
 
     }
@@ -155,7 +155,8 @@ start:
 ota_end:
     esp_https_ota_abort(https_ota_handle);
     ESP_LOGE(TAG, "ESP_HTTPS_OTA upgrade failed");
+end:
+    // TODO: Maybe delete task instead of suspending it.
     vTaskSuspend(NULL);
     goto start;
-    // TODO: Maybe delete task instead of suspending it.
 }

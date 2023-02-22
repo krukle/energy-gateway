@@ -31,10 +31,12 @@ static TaskHandle_t otaTaskHandle = NULL;
 
 void otaTimerCallback( TimerHandle_t pxTimer )
 {
-    ESP_LOGI("otaTimerCallback", "Task handle should be not null but is: %p", otaTaskHandle);
     if (otaTaskHandle != NULL) {
         ESP_LOGI("otaTimerCallback", "Resuming OTA task");
         vTaskResume( otaTaskHandle );
+    } else {
+        ESP_LOGE("otaTimerCallback", "OTA task handle is NULL. Cannot resume OTA task.");
+        // TODO: Handle error.
     }
 }
 
@@ -68,9 +70,7 @@ void app_main(void)
 
     // Create a handle for the OTA task.
     // The handle is used to refer to the task later, e.g. to delete the task.
-    ESP_LOGI(TAG, "Task handle should be null but is: %p", otaTaskHandle);
     BaseType_t otaTaskStatus = xTaskCreate(&advanced_ota_example_task, "advanced_ota_example_task", 1024 * 8, &spinlock, 5, &otaTaskHandle);
-    ESP_LOGI(TAG, "Task handle should be not null but is: %p", otaTaskHandle);
     if (otaTaskStatus != pdPASS) {
         ESP_LOGE(TAG, "Error creating OTA task! Error code: %d", otaTaskStatus);
         // TODO: Handle error.

@@ -1,7 +1,8 @@
 
-/* Wi-Fi Provisioning Manager Example
+/* Energy Gateway Provisioning
 
-   This example code is in the Public Domain (or CC0 licensed, at your option.)
+   This example code is in the Public Domain (or CC0 licensed, at your 
+   option) and is heavily based on the example code from Espressif.
 
    Unless required by applicable law or agreed to in writing, this
    software is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
@@ -27,7 +28,7 @@
 
 #include "energy_gateway_provisioning.h"
 
-static const char *TAG = "app";
+static const char *TAG = "energy_gateway_provisioning";
 
 #if CONFIG_EXAMPLE_PROV_SECURITY_VERSION_2
 #if CONFIG_EXAMPLE_PROV_SEC2_DEV_MODE
@@ -240,7 +241,7 @@ static void wifi_prov_print_qr(const char *name, const char *username, const cha
     ESP_LOGI(TAG, "If QR code is not visible, copy paste the below URL in a browser.\n%s?data=%s", QRCODE_BASE_URL, payload);
 }
 
-void energy_gateway_start_provisioning(void)
+void start_provisioning(void *pvParameters)
 {
     /* Initialize NVS partition */
     esp_err_t ret = nvs_flash_init();

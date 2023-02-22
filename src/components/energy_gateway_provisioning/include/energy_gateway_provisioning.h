@@ -1,1 +1,1 @@
-void energy_gateway_start_provisioning(void);
+void start_provisioning(void *pvParameters);

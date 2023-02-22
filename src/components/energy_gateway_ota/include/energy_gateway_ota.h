@@ -1,1 +1,1 @@
-void advanced_ota_example_task(portMUX_TYPE *spinlock);
+void start_ota(portMUX_TYPE *spinlock);

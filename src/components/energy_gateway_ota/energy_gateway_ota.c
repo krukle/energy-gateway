@@ -74,7 +74,7 @@ static esp_err_t _http_client_init_cb(esp_http_client_handle_t http_client)
     return err;
 }
 
-void start_ota( portMUX_TYPE *spinlock )
+void start_ota( void * pvParameters )
 {
 start:
     ESP_LOGI(TAG, "Starting Over The Air Update...");
@@ -136,9 +136,9 @@ start:
         ESP_LOGE(TAG, "Complete data was not received.");
     } else {
         // TODO: Make sure this is not interrupted by other tasks.
-        taskENTER_CRITICAL(spinlock);
+        // taskENTER_CRITICAL(pvParameters);
         ota_finish_err = esp_https_ota_finish(https_ota_handle);
-        taskEXIT_CRITICAL(spinlock);
+        // taskEXIT_CRITICAL(pvParameters);
         if ((err == ESP_OK) && (ota_finish_err == ESP_OK)) {
             ESP_LOGI(TAG, "ESP_HTTPS_OTA upgrade successful. Rebooting ...");
             vTaskDelay(1000 / portTICK_PERIOD_MS);

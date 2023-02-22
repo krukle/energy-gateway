@@ -113,6 +113,7 @@ start:
         ESP_LOGE(TAG, "esp_https_ota_read_img_desc failed");
         goto ota_end;
     }
+    // TODO: Image header verification fails whenver the version number is the same.
     err = validate_image_header(&app_desc);
     if (err != ESP_OK) {
         ESP_LOGE(TAG, "image header verification failed");
@@ -155,9 +156,10 @@ start:
 
 ota_end:
     esp_https_ota_abort(https_ota_handle);
-    ESP_LOGE(TAG, "ESP_HTTPS_OTA upgrade failed");
+    ESP_LOGW(TAG, "ESP_HTTPS_OTA upgrade aborted");
 end:
     // TODO: Maybe delete task instead of suspending it.
+    ESP_LOGI(TAG, "Suspending OTA task...");
     vTaskSuspend(NULL);
     goto start;
 }

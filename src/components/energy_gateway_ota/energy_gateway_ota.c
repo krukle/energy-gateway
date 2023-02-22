@@ -1,6 +1,7 @@
-/* Advanced HTTPS OTA example
+/* Energy Gateway OTA
 
-   This example code is in the Public Domain (or CC0 licensed, at your option.)
+   This example code is in the Public Domain (or CC0 licensed, at your 
+   option) and is heavily based on the example code from Espressif.
 
    Unless required by applicable law or agreed to in writing, this
    software is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
@@ -26,7 +27,7 @@
 
 #include "esp_wifi.h"
 
-static const char *TAG = "advanced_https_ota_example";
+static const char *TAG = "energy_gateway_ota";
 extern const uint8_t server_cert_pem_start[] asm("_binary_ca_cert_pem_start");
 extern const uint8_t server_cert_pem_end[] asm("_binary_ca_cert_pem_end");
 
@@ -73,10 +74,10 @@ static esp_err_t _http_client_init_cb(esp_http_client_handle_t http_client)
     return err;
 }
 
-void advanced_ota_example_task( portMUX_TYPE *spinlock )
+void start_ota( portMUX_TYPE *spinlock )
 {
 start:
-    ESP_LOGI(TAG, "Starting Advanced OTA example");
+    ESP_LOGI(TAG, "Starting Over The Air Update...");
 
     esp_err_t ota_finish_err = ESP_OK;
     esp_http_client_config_t config = {

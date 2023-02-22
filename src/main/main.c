@@ -70,7 +70,7 @@ void app_main(void)
 
     // Create a handle for the OTA task.
     // The handle is used to refer to the task later, e.g. to delete the task.
-    BaseType_t otaTaskStatus = xTaskCreate(&advanced_ota_example_task, "advanced_ota_example_task", 1024 * 8, &spinlock, 5, &otaTaskHandle);
+    BaseType_t otaTaskStatus = xTaskCreate(&start_ota, "start_ota", 1024 * 8, &spinlock, 5, &otaTaskHandle);
     if (otaTaskStatus != pdPASS) {
         ESP_LOGE(TAG, "Error creating OTA task! Error code: %d", otaTaskStatus);
         // TODO: Handle error.

@@ -25,8 +25,9 @@
 #include "esp_efuse.h"
 #endif
 
+// Uncomment for initializiation of spinlock
+// static portMUX_TYPE spinlock = portMUX_INITIALIZER_UNLOCKED;
 static const char *TAG = "main";
-static portMUX_TYPE spinlock = portMUX_INITIALIZER_UNLOCKED;
 static TaskHandle_t otaTaskHandle = NULL;
 
 void otaTimerCallback( TimerHandle_t pxTimer )
@@ -70,7 +71,7 @@ void app_main(void)
 
     // Create a handle for the OTA task.
     // The handle is used to refer to the task later, e.g. to delete the task.
-    BaseType_t otaTaskStatus = xTaskCreate(start_ota, "start_ota", 1024 * 8, &spinlock, 5, &otaTaskHandle);
+    BaseType_t otaTaskStatus = xTaskCreate(start_ota, "start_ota", 1024 * 8, NULL, 5, &otaTaskHandle);
     if (otaTaskStatus != pdPASS) {
         ESP_LOGE(TAG, "Error creating OTA task! Error code: %d", otaTaskStatus);
         // TODO: Handle error.
@@ -80,7 +81,7 @@ void app_main(void)
     }
 
 
-    TimerHandle_t otaTimerHandle = xTimerCreate("otaTimer", pdMS_TO_TICKS(1000*20), pdTRUE, (void*)1, otaTimerCallback);
+    TimerHandle_t otaTimerHandle = xTimerCreate("otaTimer", pdMS_TO_TICKS(36*100000), pdTRUE, (void*)1, otaTimerCallback);
     if (otaTimerHandle == NULL)
     {
         ESP_LOGE(TAG, "Error creating OTA timer!");

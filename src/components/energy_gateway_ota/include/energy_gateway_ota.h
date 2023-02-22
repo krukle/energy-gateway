@@ -1,1 +1,1 @@
-void start_ota(portMUX_TYPE *spinlock);
+void start_ota(void * pvParameters);

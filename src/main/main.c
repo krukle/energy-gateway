@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -28,6 +29,7 @@
 // Uncomment for initializiation of spinlock
 // static portMUX_TYPE spinlock = portMUX_INITIALIZER_UNLOCKED;
 static const char *TAG = "main";
+static TaskHandle_t highPrioTaskHandle = NULL;
 static TaskHandle_t otaTaskHandle = NULL;
 
 void otaTimerCallback( TimerHandle_t pxTimer )
@@ -38,6 +40,29 @@ void otaTimerCallback( TimerHandle_t pxTimer )
     } else {
         ESP_LOGE("otaTimerCallback", "OTA task handle is NULL. Cannot resume OTA task.");
         // TODO: Handle error.
+    }
+}
+
+int simulate_serial_read(void)
+{
+    int r = rand() % 100;
+    return r;
+}
+
+void high_priority_task(void *pvParameter)
+{
+    while (1) {
+        int r = simulate_serial_read();
+        ESP_LOGI(TAG, "Serial: %d", r);
+        if (r > 90) {
+            ESP_LOGI(TAG, "High value! Write to serial...");
+            vTaskDelay(500 / portTICK_PERIOD_MS);
+        } else if (r < 10) {
+            ESP_LOGI(TAG, "Low value! Write to serial...");
+            vTaskDelay(500 / portTICK_PERIOD_MS);
+        }
+        ESP_LOGI(TAG, "Do some other stuff here...");
+        vTaskDelay(100 / portTICK_PERIOD_MS);
     }
 }
 
@@ -69,9 +94,29 @@ void app_main(void)
     esp_wifi_set_ps(WIFI_PS_NONE);
 
 
+    // We could pin the high priority task to a specific core and let the other tasks fight for the other core.
+    UBaseType_t uxPriorityHighPriorityTask = 15;
+    BaseType_t highPriorityTaskStatus = xTaskCreate(
+        high_priority_task,
+        "high_priority_task",
+        1024 * 8,
+        NULL,
+        uxPriorityHighPriorityTask,
+        &highPrioTaskHandle
+    );
+    // BaseType_t highPriorityTaskStatus = xTaskCreatePinnedToCore(high_priority_task, "high_priority_task", 1024 * 8, NULL, 10, &highPrioTaskHandle, 1);
+    if (highPriorityTaskStatus != pdPASS) {
+        ESP_LOGE(TAG, "Error creating high priority task! Error code: %d", highPriorityTaskStatus);
+    } else
+    {
+        ESP_LOGI(TAG, "High priority task created successfully!");
+    }
+
+
     // Create a handle for the OTA task.
     // The handle is used to refer to the task later, e.g. to delete the task.
     BaseType_t otaTaskStatus = xTaskCreate(start_ota, "start_ota", 1024 * 8, NULL, 5, &otaTaskHandle);
+    // BaseType_t otaTaskStatus = xTaskCreatePinnedToCore(start_ota, "start_ota", 1024 * 8, NULL, 5, &otaTaskHandle, 1);
     if (otaTaskStatus != pdPASS) {
         ESP_LOGE(TAG, "Error creating OTA task! Error code: %d", otaTaskStatus);
         // TODO: Handle error.

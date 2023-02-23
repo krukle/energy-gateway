@@ -20,6 +20,7 @@
 
 #include "energy_gateway_ota.h"
 #include "energy_gateway_provisioning.h"
+#include "energy_gateway_uart.h"
 
 #if CONFIG_BOOTLOADER_APP_ANTI_ROLLBACK
 #include "esp_efuse.h"
@@ -43,61 +44,62 @@ void otaTimerCallback( TimerHandle_t pxTimer )
 
 void app_main(void)
 {
-    start_provisioning(NULL);
+    // start_provisioning(NULL);
 
-    #if defined(CONFIG_BOOTLOADER_APP_ROLLBACK_ENABLE)
-        /**
-         * We are treating successful WiFi connection as a checkpoint to cancel rollback
-         * process and mark newly updated firmware image as active. For production cases,
-         * please tune the checkpoint behavior per end application requirement.
-         */
-        const esp_partition_t *running = esp_ota_get_running_partition();
-        esp_ota_img_states_t ota_state;
-        if (esp_ota_get_state_partition(running, &ota_state) == ESP_OK) {
-            if (ota_state == ESP_OTA_IMG_PENDING_VERIFY) {
-                if (esp_ota_mark_app_valid_cancel_rollback() == ESP_OK) {
-                    ESP_LOGI(TAG, "App is valid, rollback cancelled successfully");
-                } else {
-                    ESP_LOGE(TAG, "Failed to cancel rollback");
-                }
-            }
-        }
-    #endif
+    // #if defined(CONFIG_BOOTLOADER_APP_ROLLBACK_ENABLE)
+    //     /**
+    //      * We are treating successful WiFi connection as a checkpoint to cancel rollback
+    //      * process and mark newly updated firmware image as active. For production cases,
+    //      * please tune the checkpoint behavior per end application requirement.
+    //      */
+    //     const esp_partition_t *running = esp_ota_get_running_partition();
+    //     esp_ota_img_states_t ota_state;
+    //     if (esp_ota_get_state_partition(running, &ota_state) == ESP_OK) {
+    //         if (ota_state == ESP_OTA_IMG_PENDING_VERIFY) {
+    //             if (esp_ota_mark_app_valid_cancel_rollback() == ESP_OK) {
+    //                 ESP_LOGI(TAG, "App is valid, rollback cancelled successfully");
+    //             } else {
+    //                 ESP_LOGE(TAG, "Failed to cancel rollback");
+    //             }
+    //         }
+    //     }
+    // #endif
 
-    // Ensure to disable any WiFi power save mode, this allows best throughput
-    // and hence timings for overall OTA operation.
-    esp_wifi_set_ps(WIFI_PS_NONE);
-
-
-    // Create a handle for the OTA task.
-    // The handle is used to refer to the task later, e.g. to delete the task.
-    BaseType_t otaTaskStatus = xTaskCreate(start_ota, "start_ota", 1024 * 8, NULL, 5, &otaTaskHandle);
-    if (otaTaskStatus != pdPASS) {
-        ESP_LOGE(TAG, "Error creating OTA task! Error code: %d", otaTaskStatus);
-        // TODO: Handle error.
-    } else
-    {
-        ESP_LOGI(TAG, "OTA task created successfully!");
-    }
+    // // Ensure to disable any WiFi power save mode, this allows best throughput
+    // // and hence timings for overall OTA operation.
+    // esp_wifi_set_ps(WIFI_PS_NONE);
 
 
-    TimerHandle_t otaTimerHandle = xTimerCreate("otaTimer", pdMS_TO_TICKS(36*100000), pdTRUE, (void*)1, otaTimerCallback);
-    if (otaTimerHandle == NULL)
-    {
-        ESP_LOGE(TAG, "Error creating OTA timer!");
-    }
-    else
-    {
-        ESP_LOGI(TAG, "OTA timer created successfully!");
-        BaseType_t timerStartState = xTimerStart(otaTimerHandle, 0);
-        if (timerStartState != pdPASS)
-        {
-            ESP_LOGE(TAG, "Error starting OTA timer!");
-            // TODO: Handle error.
-        }
-        else
-        {
-            ESP_LOGI(TAG, "OTA timer started successfully!");
-        }
-    }
+    // // Create a handle for the OTA task.
+    // // The handle is used to refer to the task later, e.g. to delete the task.
+    // BaseType_t otaTaskStatus = xTaskCreate(start_ota, "start_ota", 1024 * 8, NULL, 5, &otaTaskHandle);
+    // if (otaTaskStatus != pdPASS) {
+    //     ESP_LOGE(TAG, "Error creating OTA task! Error code: %d", otaTaskStatus);
+    //     // TODO: Handle error.
+    // } else
+    // {
+    //     ESP_LOGI(TAG, "OTA task created successfully!");
+    // }
+
+
+    // TimerHandle_t otaTimerHandle = xTimerCreate("otaTimer", pdMS_TO_TICKS(36*100000), pdTRUE, (void*)1, otaTimerCallback);
+    // if (otaTimerHandle == NULL)
+    // {
+    //     ESP_LOGE(TAG, "Error creating OTA timer!");
+    // }
+    // else
+    // {
+    //     ESP_LOGI(TAG, "OTA timer created successfully!");
+    //     BaseType_t timerStartState = xTimerStart(otaTimerHandle, 0);
+    //     if (timerStartState != pdPASS)
+    //     {
+    //         ESP_LOGE(TAG, "Error starting OTA timer!");
+    //         // TODO: Handle error.
+    //     }
+    //     else
+    //     {
+    //         ESP_LOGI(TAG, "OTA timer started successfully!");
+    //     }
+    // }
+    xTaskCreate(start_uart_echo, "uart_echo_task", ECHO_TASK_STACK_SIZE, NULL, 10, NULL);
 }

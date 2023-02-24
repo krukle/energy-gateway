@@ -30,6 +30,7 @@
 // static portMUX_TYPE spinlock = portMUX_INITIALIZER_UNLOCKED;
 static const char *TAG = "main";
 static TaskHandle_t otaTaskHandle = NULL;
+static uint8_t *uartBuffer = NULL;
 
 void otaTimerCallback( TimerHandle_t pxTimer )
 {
@@ -39,6 +40,20 @@ void otaTimerCallback( TimerHandle_t pxTimer )
     } else {
         ESP_LOGE("otaTimerCallback", "OTA task handle is NULL. Cannot resume OTA task.");
         // TODO: Handle error.
+    }
+}
+
+void uartBufferReaderTask(void *pvParameter)
+{
+    ESP_LOGI(TAG, "UART buffer reader task started");
+    while (1) {
+        if (uartBuffer[0] != 0) {
+            ESP_LOGI(TAG, "Buffer contains: %s", (char *) uartBuffer);
+
+            // Reset buffer.
+            memset(uartBuffer, 0, UART_BUF_SIZE);
+        }
+        vTaskDelay(10 / portTICK_PERIOD_MS);
     }
 }
 
@@ -101,5 +116,8 @@ void app_main(void)
     //         ESP_LOGI(TAG, "OTA timer started successfully!");
     //     }
     // }
-    xTaskCreate(start_uart_echo, "uart_echo_task", ECHO_TASK_STACK_SIZE, NULL, 10, NULL);
+
+    uartBuffer = (uint8_t *) malloc(UART_BUF_SIZE);
+    xTaskCreate(start_uart_echo, "uart_echo_task", ECHO_TASK_STACK_SIZE, uartBuffer, 10, NULL);
+    xTaskCreate(uartBufferReaderTask, "uartBufferReaderTask", 1024 * 2, NULL, 5, NULL);
 }

@@ -27,10 +27,10 @@
 #include "esp_efuse.h"
 #endif
 
-// Uncomment for initializiation of spinlock
-// static portMUX_TYPE spinlock = portMUX_INITIALIZER_UNLOCKED;
+#define ESP_TASK_CUSTOM_PRIO_MAX  (ESP_TASK_PRIO_MAX - 6) // 19 : Over networks tasks but under interrupts and events.
+
 static const char *TAG = "main";
-static TaskHandle_t highPrioTaskHandle = NULL;
+static TaskHandle_t uartTaskHandle = NULL;
 static TaskHandle_t otaTaskHandle = NULL;
 static uint8_t *uartBuffer = NULL;
 
@@ -48,82 +48,45 @@ void otaTimerCallback( TimerHandle_t pxTimer )
 void app_main(void)
 {
     start_provisioning(NULL);
+    
+    esp_wifi_set_ps(WIFI_PS_NONE); // Ensure to disable any WiFi power save mode, this allows best throughput
 
-    // #if defined(CONFIG_BOOTLOADER_APP_ROLLBACK_ENABLE)
-    //     /**
-    //      * We are treating successful WiFi connection as a checkpoint to cancel rollback
-    //      * process and mark newly updated firmware image as active. For production cases,
-    //      * please tune the checkpoint behavior per end application requirement.
-    //      */
-    //     const esp_partition_t *running = esp_ota_get_running_partition();
-    //     esp_ota_img_states_t ota_state;
-    //     if (esp_ota_get_state_partition(running, &ota_state) == ESP_OK) {
-    //         if (ota_state == ESP_OTA_IMG_PENDING_VERIFY) {
-    //             if (esp_ota_mark_app_valid_cancel_rollback() == ESP_OK) {
-    //                 ESP_LOGI(TAG, "App is valid, rollback cancelled successfully");
-    //             } else {
-    //                 ESP_LOGE(TAG, "Failed to cancel rollback");
-    //             }
-    //         }
-    //     }
-    // #endif
-
-    // // Ensure to disable any WiFi power save mode, this allows best throughput
-    // // and hence timings for overall OTA operation.
-    esp_wifi_set_ps(WIFI_PS_NONE);
-
-    // We could pin the high priority task to a specific core and let the other tasks fight for the other core.
     uartBuffer = (uint8_t *) malloc(UART_BUF_SIZE);
-    UBaseType_t uxPriorityHighPriorityTask = 15;
     BaseType_t highPriorityTaskStatus = xTaskCreate(
         start_uart_echo,
-        "high_priority_task",
+        "uart_task",
         ECHO_TASK_STACK_SIZE,
         uartBuffer,
-        uxPriorityHighPriorityTask,
-        &highPrioTaskHandle
+        ESP_TASK_CUSTOM_PRIO_MAX,
+        &uartTaskHandle
     );
-    // BaseType_t highPriorityTaskStatus = xTaskCreatePinnedToCore(high_priority_task, "high_priority_task", 1024 * 8, NULL, 10, &highPrioTaskHandle, 1);
     if (highPriorityTaskStatus != pdPASS) {
+        // TODO: Handle error. Should we send it somewhere?
         ESP_LOGE(TAG, "Error creating high priority task! Error code: %d", highPriorityTaskStatus);
-    } else
-    {
-        ESP_LOGI(TAG, "High priority task created successfully!");
+        esp_restart();
     }
 
-    // xTaskCreate(start_uart_echo, "uart_echo_task", ECHO_TASK_STACK_SIZE, uartBuffer, 10, NULL);
-    // xTaskCreate(uartBufferReaderTask, "uartBufferReaderTask", 1024 * 2, NULL, 5, NULL);
-
-
-    // Create a handle for the OTA task.
-    // The handle is used to refer to the task later, e.g. to delete the task.
-    BaseType_t otaTaskStatus = xTaskCreate(start_ota, "start_ota", 1024 * 8, NULL, 5, &otaTaskHandle);
-    // BaseType_t otaTaskStatus = xTaskCreatePinnedToCore(start_ota, "start_ota", 1024 * 8, NULL, 5, &otaTaskHandle, 1);
+    BaseType_t otaTaskStatus = xTaskCreate(start_ota, "start_ota", 1024 * 8, NULL, ESP_TASK_MAIN_PRIO + 1, &otaTaskHandle);
     if (otaTaskStatus != pdPASS) {
+        // TODO: Handle error. Should we send it somewhere?
         ESP_LOGE(TAG, "Error creating OTA task! Error code: %d", otaTaskStatus);
-        // TODO: Handle error.
-    } else
-    {
-        ESP_LOGI(TAG, "OTA task created successfully!");
+        esp_restart();
     }
 
-    // TimerHandle_t otaTimerHandle = xTimerCreate("otaTimer", pdMS_TO_TICKS(36*100000), pdTRUE, (void*)1, otaTimerCallback);
-    // if (otaTimerHandle == NULL)
-    // {
-    //     ESP_LOGE(TAG, "Error creating OTA timer!");
-    // }
-    // else
-    // {
-    //     ESP_LOGI(TAG, "OTA timer created successfully!");
-    //     BaseType_t timerStartState = xTimerStart(otaTimerHandle, 0);
-    //     if (timerStartState != pdPASS)
-    //     {
-    //         ESP_LOGE(TAG, "Error starting OTA timer!");
-    //         // TODO: Handle error.
-    //     }
-    //     else
-    //     {
-    //         ESP_LOGI(TAG, "OTA timer started successfully!");
-    //     }
-    // }
+    TimerHandle_t otaTimerHandle = xTimerCreate("otaTimer", pdMS_TO_TICKS(36*100000), pdTRUE, (void*)1, otaTimerCallback);
+    if (otaTimerHandle == NULL)
+    {
+        // TODO: Handle error. Should we send it somewhere?
+        ESP_LOGE(TAG, "Error creating OTA timer!");
+        esp_restart();
+    }
+    ESP_LOGI(TAG, "OTA timer created successfully!");
+
+    BaseType_t timerStartState = xTimerStart(otaTimerHandle, 0);
+    if (timerStartState != pdPASS)
+    {
+        // TODO: Handle error. Should we send it somewhere?
+        ESP_LOGE(TAG, "Error starting OTA timer!");
+        esp_restart();
+    }
 }

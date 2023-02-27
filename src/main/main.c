@@ -45,6 +45,14 @@ void otaTimerCallback( TimerHandle_t pxTimer )
     }
 }
 
+void reboot_on_error(BaseType_t to_check, const char *msg)
+{
+    if (to_check != pdPASS) {
+        ESP_LOGE(TAG, "Error: %s. Code: %d", msg, to_check);
+        esp_restart();
+    }
+}
+
 void app_main(void)
 {
     start_provisioning(NULL);
@@ -60,18 +68,12 @@ void app_main(void)
         ESP_TASK_CUSTOM_PRIO_MAX,
         &uartTaskHandle
     );
-    if (highPriorityTaskStatus != pdPASS) {
-        // TODO: Handle error. Should we send it somewhere?
-        ESP_LOGE(TAG, "Error creating high priority task! Error code: %d", highPriorityTaskStatus);
-        esp_restart();
-    }
+    reboot_on_error(highPriorityTaskStatus, "Error creating high priority task!");
+    ESP_LOGI(TAG, "High priority task created successfully!");
 
     BaseType_t otaTaskStatus = xTaskCreate(start_ota, "start_ota", 1024 * 8, NULL, ESP_TASK_MAIN_PRIO + 1, &otaTaskHandle);
-    if (otaTaskStatus != pdPASS) {
-        // TODO: Handle error. Should we send it somewhere?
-        ESP_LOGE(TAG, "Error creating OTA task! Error code: %d", otaTaskStatus);
-        esp_restart();
-    }
+    reboot_on_error(otaTaskStatus, "Error creating OTA task!");
+    ESP_LOGI(TAG, "OTA task created successfully!");
 
     TimerHandle_t otaTimerHandle = xTimerCreate("otaTimer", pdMS_TO_TICKS(36*100000), pdTRUE, (void*)1, otaTimerCallback);
     if (otaTimerHandle == NULL)
@@ -83,10 +85,6 @@ void app_main(void)
     ESP_LOGI(TAG, "OTA timer created successfully!");
 
     BaseType_t timerStartState = xTimerStart(otaTimerHandle, 0);
-    if (timerStartState != pdPASS)
-    {
-        // TODO: Handle error. Should we send it somewhere?
-        ESP_LOGE(TAG, "Error starting OTA timer!");
-        esp_restart();
-    }
+    reboot_on_error(timerStartState, "Error starting OTA timer!");
+    ESP_LOGI(TAG, "OTA timer started successfully!");
 }

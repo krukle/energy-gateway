@@ -8,6 +8,7 @@
    CONDITIONS OF ANY KIND, either express or implied.
 */
 #include <stdio.h>
+#include <string.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "driver/uart.h"
@@ -40,10 +41,10 @@
 
 static const char *TAG  = "Energy Gateway UART";
 
-void start_uart_echo(void *arg)
+void start_uart_echo(void *uartData)
 {
     ESP_LOGI(TAG, "UART echo task started");
-    ESP_LOGI(TAG, "Buffer contains: %s", (char *) arg);
+    ESP_LOGI(TAG, "Buffer contains: %s", (char *) uartData);
     /* Configure parameters of an UART driver,
      * communication pins and install the driver */
     uart_config_t uart_config = {
@@ -67,7 +68,25 @@ void start_uart_echo(void *arg)
     // uint8_t *data = (uint8_t *) malloc(BUF_SIZE);
 
     while (1) {
-        int len = uart_read_bytes(ECHO_UART_PORT_NUM, (char *) arg, (UART_BUF_SIZE - 1), 20 / portTICK_PERIOD_MS);
-        uart_write_bytes(ECHO_UART_PORT_NUM, (const char *) arg, len);
+        uart_read_bytes(ECHO_UART_PORT_NUM, (char *) uartData, (UART_BUF_SIZE - 1), 20 / portTICK_PERIOD_MS);
+        if (((char *) uartData)[0] != 0) {
+            uint8_t receivedValue = *(uint8_t *) uartData;
+            ESP_LOGI(TAG, "Buffer contains: %d", receivedValue);
+            if (receivedValue > 250) {
+                ESP_LOGI(TAG, "High value! Write to serial...");
+                *(uint8_t *) uartData = 1;
+                uart_write_bytes(ECHO_UART_PORT_NUM, (const char *) uartData, 1);
+                vTaskDelay(2000 / portTICK_PERIOD_MS);
+            } else if (receivedValue < 5) {
+                ESP_LOGI(TAG, "Low value! Write to serial...");
+                *(uint8_t *) uartData = 0;
+                uart_write_bytes(ECHO_UART_PORT_NUM, (const char *) uartData, 1);
+                vTaskDelay(2000 / portTICK_PERIOD_MS);
+            }
+
+            // Reset buffer.
+            memset(uartData, 0, UART_BUF_SIZE);
+        }
+        vTaskDelay(10 / portTICK_PERIOD_MS);
     }
 }

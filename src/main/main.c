@@ -45,46 +45,9 @@ void otaTimerCallback( TimerHandle_t pxTimer )
     }
 }
 
-void uartBufferReaderTask(void *pvParameter)
-{
-    ESP_LOGI(TAG, "UART buffer reader task started");
-    while (1) {
-        if (uartBuffer[0] != 0) {
-            ESP_LOGI(TAG, "Buffer contains: %s", (char *) uartBuffer);
-
-            // Reset buffer.
-            memset(uartBuffer, 0, UART_BUF_SIZE);
-        }
-        vTaskDelay(10 / portTICK_PERIOD_MS);
-    }
-}
-
-int simulate_serial_read(void)
-{
-    int r = rand() % 100;
-    return r;
-}
-
-void high_priority_task(void *pvParameter)
-{
-    while (1) {
-        int r = simulate_serial_read();
-        ESP_LOGI(TAG, "Serial: %d", r);
-        if (r > 90) {
-            ESP_LOGI(TAG, "High value! Write to serial...");
-            vTaskDelay(500 / portTICK_PERIOD_MS);
-        } else if (r < 10) {
-            ESP_LOGI(TAG, "Low value! Write to serial...");
-            vTaskDelay(500 / portTICK_PERIOD_MS);
-        }
-        ESP_LOGI(TAG, "Do some other stuff here...");
-        vTaskDelay(100 / portTICK_PERIOD_MS);
-    }
-}
-
 void app_main(void)
 {
-    // start_provisioning(NULL);
+    start_provisioning(NULL);
 
     // #if defined(CONFIG_BOOTLOADER_APP_ROLLBACK_ENABLE)
     //     /**
@@ -107,15 +70,16 @@ void app_main(void)
 
     // // Ensure to disable any WiFi power save mode, this allows best throughput
     // // and hence timings for overall OTA operation.
-    // esp_wifi_set_ps(WIFI_PS_NONE);
+    esp_wifi_set_ps(WIFI_PS_NONE);
 
     // We could pin the high priority task to a specific core and let the other tasks fight for the other core.
+    uartBuffer = (uint8_t *) malloc(UART_BUF_SIZE);
     UBaseType_t uxPriorityHighPriorityTask = 15;
     BaseType_t highPriorityTaskStatus = xTaskCreate(
-        high_priority_task,
+        start_uart_echo,
         "high_priority_task",
-        1024 * 8,
-        NULL,
+        ECHO_TASK_STACK_SIZE,
+        uartBuffer,
         uxPriorityHighPriorityTask,
         &highPrioTaskHandle
     );
@@ -126,6 +90,9 @@ void app_main(void)
     {
         ESP_LOGI(TAG, "High priority task created successfully!");
     }
+
+    // xTaskCreate(start_uart_echo, "uart_echo_task", ECHO_TASK_STACK_SIZE, uartBuffer, 10, NULL);
+    // xTaskCreate(uartBufferReaderTask, "uartBufferReaderTask", 1024 * 2, NULL, 5, NULL);
 
 
     // Create a handle for the OTA task.
@@ -159,8 +126,4 @@ void app_main(void)
     //         ESP_LOGI(TAG, "OTA timer started successfully!");
     //     }
     // }
-
-    uartBuffer = (uint8_t *) malloc(UART_BUF_SIZE);
-    xTaskCreate(start_uart_echo, "uart_echo_task", ECHO_TASK_STACK_SIZE, uartBuffer, 10, NULL);
-    xTaskCreate(uartBufferReaderTask, "uartBufferReaderTask", 1024 * 2, NULL, 5, NULL);
 }

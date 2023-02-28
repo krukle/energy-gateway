@@ -75,7 +75,9 @@ void app_main(void)
     reboot_on_error(otaTaskStatus, "Error creating OTA task!");
     ESP_LOGI(TAG, "OTA task created successfully!");
 
-    TimerHandle_t otaTimerHandle = xTimerCreate("otaTimer", pdMS_TO_TICKS(36*100000), pdTRUE, (void*)1, otaTimerCallback);
+    // Test with lower value to see if uart task is not interrupted.
+    // TimerHandle_t otaTimerHandle = xTimerCreate("otaTimer", pdMS_TO_TICKS(36*100000), pdTRUE, (void*)1, otaTimerCallback);
+    TimerHandle_t otaTimerHandle = xTimerCreate("otaTimer", pdMS_TO_TICKS(5000), pdTRUE, (void*)1, otaTimerCallback);
     if (otaTimerHandle == NULL)
     {
         // TODO: Handle error. Should we send it somewhere?

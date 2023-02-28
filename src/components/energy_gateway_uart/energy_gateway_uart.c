@@ -69,6 +69,7 @@ void start_uart_echo(void *uartData)
 
     while (1) {
         uart_read_bytes(ECHO_UART_PORT_NUM, (char *) uartData, (UART_BUF_SIZE - 1), 20 / portTICK_PERIOD_MS);
+        // If a zero is received, nothing happens.
         if (((char *) uartData)[0] != 0) {
             uint8_t receivedValue = *(uint8_t *) uartData;
             ESP_LOGI(TAG, "Buffer contains: %d", receivedValue);

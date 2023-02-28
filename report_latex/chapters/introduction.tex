@@ -8,26 +8,6 @@
 \label{sec:aims}
 The aim of this project is to develop a reliable system for provisioning and over the air (OTA) updates for ESP32 microcontroller units. Specifically, the system should be designed to make the initial setup and connection of the ESP32 to a Wi-Fi network as easy as possible, using Bluetooth and a mobile device. It should also be capable of reliably updating the firmware or binary of the ESP32 over the air, without interrupting any critical tasks that the unit may be currently running.
 
-\subsection{Technical background}
-\label{sec:technical}
-ESP32 is a low-cost, low-power system on a chip (SoC) microcontroller that is widely used in Internet of Things (IoT) applications due to its built-in Wi-Fi and Bluetooth capabilities \cite{espressif:popularity} \cite{espressif:esp32_datasheet}.
-
-\subsubsection{Bluetooth Provisioning}
-\label{subsec:bluetooth}
-To make the initial setup of the ESP32 as easy as possible, the project aims to use Bluetooth and a mobile device to enable easy provisioning of the device to a Wi-Fi network.
-
-The Bluetooth provisioning function will allow the end user to input the Wi-Fi SSID and password, without the need for a computer.
-
-\subsubsection{OTA Updates}
-\label{subsec:ota}
-OTA updates allow firmware or software updates to be installed on an ESP32 device over a network connection, without the need for a physical connection to a computer. However, OTA updates can be challenging to implement and can result in unexpected interruptions and errors if not handled correctly \cite{Arakadakis:2021}.
-
-The project will focus on developing a reliable OTA update system that can be integrated into the ESP-IDF framework.
-
-\subsection{Social background}
-\label{sec:social}
-The increasing popularity of IoT devices has led to a growing demand for systems that can be easily and reliably updated over the air. This is particularly important for devices that are deployed in remote or hard-to-reach locations, where physical access for updates may not be possible or practical. By developing a system for reliable OTA updates, this project aims to address this need and make it easier for end-users to maintain and update their ESP32 devices. //citation may be useful to support the claim about the growing demand for OTA updates for IoT devices
-
-\subsection{Previous research}
-\label{sec:previous}
-There is existing research and development in the field of OTA updates for IoT devices. However, many of these solutions are proprietary and may not be easily integrated into existing projects. Additionally, many existing solutions are designed for specific devices or platforms and may not be suitable for the ESP32 microcontroller unit. Therefore, this project aims to develop a solution that is easily integrated into projects using the ESP-IDF framework and can be customized to meet the specific needs of different applications. //citation may be useful to support the claim about existing OTA update solutions and their limitations
+\subsection{Structure}
+\label{sec:structure}
+This report is structured as follows. Section \ref{sec:background} provides a brief overview of the ESP32 microcontroller unit, and the Wi-Fi and Bluetooth protocols. Section \ref{sec:system} describes the system that was developed for this project. Section \ref{sec:results} presents the results of the system, and Section \ref{sec:conclusion} concludes the report. // Written by Co-pilot.

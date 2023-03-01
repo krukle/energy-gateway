@@ -1,14 +1,61 @@
 %----------------------------------------------------------------------------------------
 % Analytical Process
 %----------------------------------------------------------------------------------------
-\section{Analytical Process}
-\label{sec:analytical_process}
+\section{Analytical Process}\label{sec:analytical_process}
 
-\subsection{Research Questions}
-\label{sec:research_questions}
+\subsection{Methodology}\label{sec:methodology}
 
-\subsection{Metodology}
-\label{sec:metodology}
+\subsubsection{WiFi Provisioning through Bluetooth}
 
-\subsection{Result}
-\label{sec:result}
+Internet of Things has brought about a need for efficient communication protocols for various devices, including the ESP32 microcontroller. The WiFi provisioning through Bluetooth is a novel method that enables streamlined configuration of the WiFi credentials of an ESP32 module through the use of a Bluetooth Low Energy (BLE)-enabled device, such as a smartphone.
+
+The WiFi provisioning through Bluetooth consists of the following steps:
+
+\begin{enumerate}
+  \item The ESP32 module starts a BLE server with a predefined service UUID and advertises itself as a WiFi provisioning device.
+  \item A BLE-enabled device scans for nearby BLE devices and connects to the ESP32 module using its service UUID, enabling communication between the devices.
+  \item The BLE-enabled device sends a protobuf message to the ESP32 module using the \texttt{wifi\_scan endpoint}, requesting a list of available WiFi networks.
+  \item The ESP32 module scans for nearby WiFi networks and sends back a protobuf message with the list of SSIDs and RSSIs to the BLE-enabled device using the \texttt{wifi\_scan} endpoint.
+  \item The BLE-enabled device selects a WiFi network from the list and sends its SSID and password to the ESP32 module using the \texttt{wifi\_config} endpoint.
+  \item The ESP32 module validates the credentials and attempts to connect to the selected WiFi network, sending back a protobuf message with the connection status (success or failure) to the BLE-enabled device using the \texttt{wifi\_config} endpoint. If the connection is successful, the ESP32 module obtains an Internet Protocol (IP) address from the WiFi network and stops advertising itself as a WiFi provisioning device. It also stops accepting any further provisioning requests from other devices. In the event of a connection failure, the ESP32 module resets its internal state machine and clears its provisioned credentials. It continues advertising itself as a WiFi provisioning device until it receives valid credentials or until it is manually stopped by calling the \texttt{wifi\_prov\_mgr\_stop\_provisioning()} function~\cite{espressif:esp-idf-programming-guide}.
+\end{enumerate}
+
+The WiFi provisioning through Bluetooth requires an application on both sides: one on the ESP32 module and one on the BLE-enabled device. Espressif provides an Android app that serves as a client~\cite{google-play:esp-ble-provisioning}.
+
+Overall, the WiFi provisioning through Bluetooth method provides a solution for efficent WiFi configuration on ESP32 modules. This approach mitigates the need for hard-coded credentials or user input, simplifying the process for users to connect their devices to a WiFi network. Through the use of BLE-enabled devices, this method offers efficient and secure communication between devices, making it a potential solution in the realm of IoT.
+
+\subsubsection{OTA Updates}
+
+OTA (Over-The-Air) updates allow for remote firmware updates of the ESP32 board via a Wi-Fi connection, eliminating the need for a physical connection. This functionality is useful for devices deployed in remote or hard-to-reach locations.
+
+To enable OTA updates on the ESP32, the partition table of the device must be configured with at least two "OTA app slot" partitions (i.e. \texttt{ota\_0} and \texttt{ota\_1}) and an "OTA Data Partition". 
+
+We created an \texttt{energy\_gateway\_ota} esp-idf component that handles the initialization, download, verification, and activation of new firmware images from a given URL \cite{energy-gateway:github}. We used this component in our \texttt{main.c} file to check for updates periodically and perform them if available.
+
+% TODO: Make figure reference better
+The firmware image was hosted on a web server \ref{fig:web_server}. The web server was configured to serve the firmware image over HTTP. The URL of the firmware image was then passed to the \texttt{energy\_gateway\_ota} component, which downloaded the image and verified its integrity. The component then activated the new firmware image by setting the boot partition to the OTA app slot that was not previously selected for booting. The component then rebooted the device, which would then boot into the new firmware image.
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.8\linewidth]{figures/web_server.png}
+  \caption{Web server}
+  \label{fig:web_server}
+\end{figure}
+
+This also enables the possiblity for rollback to a previous firmware image in the event of a failed update \cite{espressif:esp-idf-programming-guide}. The \texttt{energy\_gateway\_ota} component stores the current firmware image version in the \texttt{ota\_data} partition. If the new firmware image fails to boot, the component could automatically rollback to the previous firmware image. This rollback functionality was not implemented in our project.
+
+\subsubsection{UART communication}
+
+\subsection{Concurrency}
+
+When it comes to developing software with the Espressif IoT Development Framework (ESP-IDF), understanding the intricacies of priority levels is paramount for effective task management~\cite{Davis:2016}. The underlying operating system for ESP-IDF is FreeRTOS, which is a real-time operating system designed for microcontrollers that provides a multitasking environment for running multiple tasks simultaneously on a single processor. The priority-based preemptive scheduling algorithm employed by FreeRTOS is an essential feature that allows for efficient task management~\cite{espressif:esp-idf-programming-guide}.
+
+ESP-IDF utilizes a range of 26 priority levels, numbered from 0 (highest) to 25 (lowest). The variable \texttt{ESP\_TASK\_PRIO\_MAX}, which represents the maximum allowed priority level in ESP-IDF, is currently set to 25 and can be found in the FreeRTOSConfig.h file\cite{espressif:freertosconfig}. This limitation ensures that the system remains stable and responsive, even when multiple high-priority tasks are running concurrently. By utilizing these priority levels effectively, developers can optimize system performance and ensure that critical tasks receive the necessary resources to execute efficiently~\cite{espressif:esp-idf-programming-guide}.
+
+Choosing the appropriate priority level for a task requires careful consideration of its criticality and potential impact on the system. For instance, a high-priority task that reads data from a serial port demands immediate attention to avoid data loss or errors. In our project, we assigned a priority level of \texttt{ESP\_TASK\_PRIO\_MAX - 6} (level 19) to our serial-reading task. This priority level strikes a balance between prioritizing our task and allowing other tasks to run when needed. It also provides some headroom above the default priority levels of many other tasks in the system~\cite{espressif:esp-idf-programming-guide}, ensuring that our task receives immediate attention while still allowing for efficient resource allocation.
+
+Moreover, it is worth noting that prioritization is not a one-size-fits-all solution. Different tasks have different criticality levels, and thus require different priority levels. Some tasks may be less critical but more time-consuming, while others may require frequent access to system resources. As such, the priority level should be carefully selected to ensure efficient task management and optimize system performance.
+
+In conclusion, understanding the intricacies of priority levels is essential when programming with esp-idf. By choosing the appropriate priority level for each task, we can ensure efficient task management, avoid system performance degradation, and optimize system performance. With only 25 priority levels in ESP-IDF, developers have limited flexibility to assign priority levels based on the specific needs of their projects.
+
+\subsection{Result}\label{sec:result}

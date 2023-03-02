@@ -33,7 +33,7 @@ To enable OTA updates on the ESP32, the partition table of the device must be co
 We created an \texttt{energy\_gateway\_ota} esp-idf component that handles the initialization, download, verification, and activation of new firmware images from a given URL \cite{energy-gateway:github}. We used this component in our \texttt{main.c} file to check for updates periodically and perform them if available.
 
 % TODO: Make figure reference better
-The firmware image was hosted on a web server \ref{fig:web_server}. The web server was configured to serve the firmware image over HTTP. The URL of the firmware image was then passed to the \texttt{energy\_gateway\_ota} component, which downloaded the image and verified its integrity. The component then activated the new firmware image by setting the boot partition to the OTA app slot that was not previously selected for booting. The component then rebooted the device, which would then boot into the new firmware image.
+The firmware image was hosted on a web server \ref{fig:web_server}. The web server was configured to serve the firmware image over HTTPS. The URL of the firmware image was then passed to the \texttt{energy\_gateway\_ota} component, which downloaded the image and verified its integrity. The component then activated the new firmware image by setting the boot partition to the OTA app slot that was not previously selected for booting. The component then rebooted the device, which would then boot into the new firmware image.
 
 \begin{figure}[ht]
   \centering
@@ -59,3 +59,28 @@ Moreover, it is worth noting that prioritization is not a one-size-fits-all solu
 In conclusion, understanding the intricacies of priority levels is essential when programming with esp-idf. By choosing the appropriate priority level for each task, we can ensure efficient task management, avoid system performance degradation, and optimize system performance. With only 25 priority levels in ESP-IDF, developers have limited flexibility to assign priority levels based on the specific needs of their projects.
 
 \subsection{Result}\label{sec:result}
+
+\subsubsection{WiFi Provisioning through Bluetooth}
+
+The WiFi provisioning through Bluetooth system was successfully developed and implemented on the ESP32 microcontroller. The system enables efficient configuration of WiFi credentials on ESP32 devices through the use of a BLE-enabled device. The system was tested, and it was found to be reliable and effective in provisioning WiFi credentials without the need for code modification. The system was integrated as a component using the ESP-IDF framework, enabling easy integration by other developers. The use of BLE-enabled devices enhances security, making it a potential solution in the realm of IoT.
+
+\subsubsection{OTA Updates}
+
+The OTA update system was successfully developed and implemented on the ESP32 microcontroller. The system allows for remote firmware updates of the ESP32 board via a Wi-Fi connection, eliminating the need for a physical connection. The system was tested, and it was found to be reliable and effective in updating the firmware image without interrupting any critical tasks that the unit may be currently running. The \texttt{energy\_gateway\_ota} component was utilized to handle the initialization, download, verification, and activation of new firmware images. The component also integrates git tags as a versioning system, resulting in the update being aborted if the tags differ. The system also enables the possibility for rollback to a previous firmware image in the event of a failed update. However, this rollback functionality was not implemented in our project.
+
+\subsubsection{UART Communication}
+
+The implementation of serial communication on the ESP32 microcontroller was successful. The microcontroller was connected to a Wireless Stick~\ref{fig:serial_connection} and able to establish a serial communication channel with the Stick, running MicroPython, to receive and transmit data. With the \texttt{uart\_read\_bytes(ECHO\_UART\_PORT\_NUM, (char *) uartData, (UART\_BUF\_SIZE - 1), 20 / portTICK\_PERIOD\_MS);} function call, bytes was read, with a timeout of 20 milliseconds, and placed in the \texttt{uartData} buffer. 
+
+The Wireless Stick was configured to send random integers between 0 and 255 over serial that The ESP32 microcontroller was programmed to receive. The microcontroller was designed to send back a value of 1 if the received value was greater than 250 and a value of 0 if the value was less than 5. The UART communication was stress tested by sending data at 33Hz
+
+When the data had been received and the buffer checked for the correct value, the buffer was cleared and the task yielded for 10 milliseconds, using \texttt{vTaskDelay(10 / portTICK\_PERIOD\_MS);}.
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.8\linewidth]{figures/serial_connection.jpg}
+  \caption{ESP32 connected via serial}
+  \label{fig:serial_connection}
+\end{figure}
+
+\subsubsection{Concurrency}

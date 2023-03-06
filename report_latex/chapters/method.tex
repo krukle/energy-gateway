@@ -20,22 +20,9 @@ Any device could have been used to simulate a serial device, but the Heltec Wire
 
 \subsection{WiFi Provisioning through Bluetooth}
 
-Internet of Things has brought about a need for efficient communication protocols for various devices, including the ESP32 microcontroller. The WiFi provisioning through Bluetooth is a novel method that enables streamlined configuration of the WiFi credentials of an ESP32 module through the use of a Bluetooth Low Energy (BLE)-enabled device, such as a smartphone.
+The WiFi provisioning through Bluetooth process involves the ESP32 module starting a BLE server with a predefined service UUID and advertising itself as a WiFi provisioning device. A BLE-enabled device connects to the ESP32 module using its service UUID, and communication between the devices is established. The BLE-enabled device requests a list of available WiFi networks using the \texttt{wifi\_scan} endpoint, and the ESP32 module responds with a list of SSIDs and RSSIs using the same endpoint. The BLE-enabled device selects a WiFi network and sends its SSID and password to the ESP32 module using the \texttt{wifi\_config} endpoint. The ESP32 module validates the credentials, attempts to connect to the selected WiFi network, and sends a connection status message to the BLE-enabled device using the same endpoint \cite{espressif:esp-idf-programming-guide}.
 
-The WiFi provisioning through Bluetooth consists of the following steps:
-
-\begin{enumerate}
-  \item The ESP32 module starts a BLE server with a predefined service UUID and advertises itself as a WiFi provisioning device.
-  \item A BLE-enabled device scans for nearby BLE devices and connects to the ESP32 module using its service UUID, enabling communication between the devices.
-  \item The BLE-enabled device sends a protobuf message to the ESP32 module using the \texttt{wifi\_scan endpoint}, requesting a list of available WiFi networks.
-  \item The ESP32 module scans for nearby WiFi networks and sends back a protobuf message with the list of SSIDs and RSSIs to the BLE-enabled device using the \texttt{wifi\_scan} endpoint.
-  \item The BLE-enabled device selects a WiFi network from the list and sends its SSID and password to the ESP32 module using the \texttt{wifi\_config} endpoint.
-  \item The ESP32 module validates the credentials and attempts to connect to the selected WiFi network, sending back a protobuf message with the connection status (success or failure) to the BLE-enabled device using the \texttt{wifi\_config} endpoint. If the connection is successful, the ESP32 module obtains an Internet Protocol (IP) address from the WiFi network and stops advertising itself as a WiFi provisioning device. It also stops accepting any further provisioning requests from other devices. In the event of a connection failure, the ESP32 module resets its internal state machine and clears its provisioned credentials. It continues advertising itself as a WiFi provisioning device until it receives valid credentials or until it is manually stopped by calling the \texttt{wifi\_prov\_mgr\_stop\_provisioning()} function~\cite{espressif:esp-idf-programming-guide}.
-\end{enumerate}
-
-The WiFi provisioning through Bluetooth requires an application on both sides: one on the ESP32 module and one on the BLE-enabled device. Espressif provides an Android app that serves as a client~\cite{google-play:esp-ble-provisioning}.
-
-Overall, the WiFi provisioning through Bluetooth method provides a solution for efficent WiFi configuration on ESP32 modules. This approach mitigates the need for hard-coded credentials or user input, simplifying the process for users to connect their devices to a WiFi network. Through the use of BLE-enabled devices, this method offers efficient and secure communication between devices, making it a potential solution in the realm of IoT.
+The WiFi provisioning through Bluetooth method requires applications on both the ESP32 module and the BLE-enabled device, and the Google Play store offers the Espressif Android app that serves as a client \cite{google-play:esp-ble-provisioning}.
 
 \subsection{OTA Updates}
 

@@ -1,0 +1,24 @@
+%----------------------------------------------------------------------------------------
+% Results
+%----------------------------------------------------------------------------------------
+\section{Results}\label{sec:results}
+
+\subsection{WiFi Provisioning through Bluetooth}
+
+The WiFi provisioning through Bluetooth system was successfully developed and implemented on the ESP32 microcontroller. The system enables efficient configuration of WiFi credentials on ESP32 devices through the use of a BLE-enabled device. The system was tested, and it was found to be reliable and effective in provisioning WiFi credentials without the need for code modification. The system was integrated as a component using the ESP-IDF framework, enabling easy integration by other developers. The use of BLE-enabled devices enhances security, making it a potential solution in the realm of IoT.
+
+\subsection{OTA Updates}
+
+The OTA update system was successfully developed and implemented on the ESP32 microcontroller. The system allows for remote firmware updates of the ESP32 board via a Wi-Fi connection, eliminating the need for a physical connection. The system was tested, and it was found to be reliable and effective in updating the firmware image without interrupting any critical tasks that the unit may be currently running. The \texttt{energy\_gateway\_ota} component was utilized to handle the initialization, download, verification, and activation of new firmware images. The component also integrates git tags as a versioning system, resulting in the update being aborted if the tags differ. The system also enables the possibility for rollback to a previous firmware image in the event of a failed update. However, this rollback functionality was not implemented in our project.
+
+\subsection{UART Communication}
+
+The implementation of serial communication on the ESP32 microcontroller was successful. The microcontroller was connected to a Heltec Wireless Stick~\ref{fig:serial_connection} and able to establish a serial communication channel with the Stick, running MicroPython, to receive and transmit data. The Wireless Stick was programmed to send random integers between 0 and 255 over serial at an interval. The ESP32 used the \texttt{uart\_read\_bytes()} function call, to read the bytes, with a timeout of 20 milliseconds, and place them in the \texttt{uartData} buffer (see figure \ref{fig:uart_read_bytes_function}). When a value greater than 250 or less than 5 was received, the microcontroller send back a value of 1 or 0, respectively, to the Wireless Stick. After every transmission, the buffer was cleared and the task yielded for 10 milliseconds, using \texttt{vTaskDelay(10 / portTICK\_PERIOD\_MS);} to not starve other tasks of resources.
+
+The sending interval was tested at different frequencies, with promising results. When no other tasks were running, the device managed to catch all values sent at a data rate of 33Hz. Enabling the OTA task and running it every five seconds, the device was able to catch all values sent when the data rate was reduced to 20Hz.
+
+\subsection{Concurrency}
+
+First task thats creates is the UART task, which is given a priority of 19. This task is responsible for receiving data from the Wireless Stick and sending data back to the Wireless Stick. The task is given a priority of 19 to ensure that it is not preempted by any other tasks. The task is then put into a while loop, where it waits for data to be received. When data is received, the task checks if the data is greater than 250 or less than 5. If the data is greater than 250, the task sends a value of 1 back to the Wireless Stick. If the data is less than 5, the task sends a value of 0 back to the Wireless Stick. The task then yields for 10 milliseconds, using \texttt{vTaskDelay(10 / portTICK\_PERIOD\_MS);}.
+
+After the UART task is created, the OTA task is created. This task is given a priority of 2. This task is responsible for checking for new firmware images and updating the firmware image if a new one is available. The task is given a priority of 2 to ensure that it does not preemp any other tasks. After the task has been run once its removed from the task list, a timer is started that will run the task again after 24 hours. When the timer expires, the task is once again placed in the task list, on a low priority of 2.

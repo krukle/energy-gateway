@@ -5,6 +5,28 @@
 
 \subsection{Methodology}\label{sec:methodology}
 
+\subsubsection{Hardware}
+
+The Energy Gateway system consists of the following hardware components:
+
+\begin{itemize}
+  \item ESP32 devkit board
+  \item Heltec Wireless Stick
+  \item Breadboard
+  \item Connecting wires
+\end{itemize}
+
+The ESP32 devkit board is a low-cost microcontroller board that is based on the ESP32 microcontroller. It was chosen due to its low cost, integrated Wi-Fi and Bluetooth capabilities~\cite{platformio:esp32-devkitv1}.
+
+Any device could have been used to simulate a serial device, but the Heltec Wireless Stick was chosen due to availability and ease of use.
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.8\linewidth]{figures/uart_connection.png}
+  \caption{UART connection scheme}
+  \label{fig:uart_connection}
+\end{figure}
+
 \subsubsection{WiFi Provisioning through Bluetooth}
 
 Internet of Things has brought about a need for efficient communication protocols for various devices, including the ESP32 microcontroller. The WiFi provisioning through Bluetooth is a novel method that enables streamlined configuration of the WiFi credentials of an ESP32 module through the use of a Bluetooth Low Energy (BLE)-enabled device, such as a smartphone.
@@ -45,13 +67,6 @@ The firmware image was hosted on a web server \ref{fig:web_server}. The web serv
 This also enables the possiblity for rollback to a previous firmware image in the event of a failed update \cite{espressif:esp-idf-programming-guide}. The \texttt{energy\_gateway\_ota} component stores the current firmware image version in the \texttt{ota\_data} partition. If the new firmware image fails to boot, the component could automatically rollback to the previous firmware image. This rollback functionality was not implemented in our project.
 
 \subsubsection{UART communication}
-
-\begin{figure}[ht]
-  \centering
-  \includegraphics[width=0.8\linewidth]{figures/uart_connection.png}
-  \caption{UART connection scheme}
-  \label{fig:uart_connection}
-\end{figure}
 
 The Energy Gateway's final product requires the capability to poll from and send data to serial devices. To fulfill this requirement, we utilized the UART (Universal Asynchronous Receiver/Transmitter) protocol, which enables asynchronous communication between two devices in a full-duplex manner. The UART protocol is widely utilized in embedded systems, like the ESP32, to interface with sensors and actuators.
 

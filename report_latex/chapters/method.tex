@@ -30,9 +30,7 @@ The OTA update system was developed to allow for remote firmware updates of the 
 
 \subsection{UART communication}
 
-The Energy Gateway's final product requires the capability to poll from and send data to serial devices. To fulfill this requirement, we utilized the UART (Universal Asynchronous Receiver/Transmitter) protocol, which enables asynchronous communication between two devices in a full-duplex manner. The UART protocol is widely utilized in embedded systems, like the ESP32, to interface with sensors and actuators.
-
-To simulate the UART protocol, we established a Heltec Wireless Stick as a serial device and connected it to the ESP32 module via UART (refer to Figure \ref{fig:uart_connection}). We programmed the ESP32 module to request data from the Heltec Wireless Stick at a rate of 20Hz, while the Heltec Wireless Stick was programmed to transmit a random number between 0 and 255 to the ESP32 module every 50ms. The ESP32 module then evaluated whether the received data was too high or low. If the data was deemed too low, a 0 was dispatched to the Heltec Wireless Stick, and if it was too high, a 1 was transmitted. Our solution passed our testing and in the final Energy Gateway product, the ESP32 module will acquire data from the serial device only at a rate of 2Hz.
+The UART protocol was utilized to enable serial communication between the Energy Gateway system and a Heltec Wireless Stick (refer to Figure \ref{fig:uart_connection}). The ESP32 microcontroller was programmed to request data from the Heltec Wireless Stick at a rate of 20Hz, while the Heltec Wireless Stick transmitted a random number between 0 and 255 to the ESP32 module every 50ms. The ESP32 module then evaluated whether the received data was too high or low, sending back a 1 or 0, respectively, to the Heltec Wireless Stick.
 
 \subsection{Concurrency}
 

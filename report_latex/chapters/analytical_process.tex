@@ -77,17 +77,22 @@ The OTA update system was successfully developed and implemented on the ESP32 mi
 
 \subsubsection{UART Communication}
 
-The implementation of serial communication on the ESP32 microcontroller was successful. The microcontroller was connected to a Wireless Stick~\ref{fig:serial_connection} and able to establish a serial communication channel with the Stick, running MicroPython, to receive and transmit data. With the \texttt{uart\_read\_bytes(ECHO\_UART\_PORT\_NUM, (char *) uartData, (UART\_BUF\_SIZE - 1), 20 / portTICK\_PERIOD\_MS);} function call, bytes was read, with a timeout of 20 milliseconds, and placed in the \texttt{uartData} buffer. 
+The implementation of serial communication on the ESP32 microcontroller was successful. The microcontroller was connected to a Heltec Wireless Stick~\ref{fig:serial_connection} and able to establish a serial communication channel with the Stick, running MicroPython, to receive and transmit data. The Wireless Stick was programmed to send random integers between 0 and 255 over serial at an interval. The ESP32 used the \texttt{uart\_read\_bytes(ECHO\_UART\_PORT\_NUM, (char *) uartData, (UART\_BUF\_SIZE - 1), 20 / portTICK\_PERIOD\_MS);} function call, to read the bytes, with a timeout of 20 milliseconds, and place them in the \texttt{uartData} buffer. When a value greater than 250 or less than 5 was received, the microcontroller send back a value of 1 or 0, respectively, to the Wireless Stick. After every transmission, the buffer was cleared and the task yielded for 10 milliseconds, using \texttt{vTaskDelay(10 / portTICK\_PERIOD\_MS);} to not starve other tasks of resources.
 
-The Wireless Stick was configured to send random integers between 0 and 255 over serial that The ESP32 microcontroller was programmed to receive. The microcontroller was designed to send back a value of 1 if the received value was greater than 250 and a value of 0 if the value was less than 5. The UART communication was stress tested by sending data at 33Hz
-
-When the data had been received and the buffer checked for the correct value, the buffer was cleared and the task yielded for 10 milliseconds, using \texttt{vTaskDelay(10 / portTICK\_PERIOD\_MS);}.
+The sending interval was tested at different frequencies, with promising results. When no other tasks were running, the device managed to catch all values sent at a data rate of 33Hz. Enabling the OTA task and running it every five seconds, the device was able to catch all values sent when the data rate was reduced to 20Hz.
 
 \begin{figure}[ht]
   \centering
   \includegraphics[width=0.8\linewidth]{figures/serial_connection.jpg}
   \caption{ESP32 connected via serial}
   \label{fig:serial_connection}
+\end{figure}
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.8\linewidth]{figures/send_receive_33Hz.png}
+  \caption{Serial communication at 33Hz}
+  \label{fig:serial_communication_33hz}
 \end{figure}
 
 \subsubsection{Concurrency}

@@ -39,16 +39,7 @@ Overall, the WiFi provisioning through Bluetooth method provides a solution for 
 
 \subsection{OTA Updates}
 
-OTA (Over-The-Air) updates allow for remote firmware updates of the ESP32 board via a Wi-Fi connection, eliminating the need for a physical connection. This functionality is useful for devices deployed in remote or hard-to-reach locations.
-
-To enable OTA updates on the ESP32, the partition table of the device must be configured with at least two "OTA app slot" partitions (i.e. \texttt{ota\_0} and \texttt{ota\_1}) and an "OTA Data Partition". 
-
-We created an \texttt{energy\_gateway\_ota} esp-idf component that handles the initialization, download, verification, and activation of new firmware images from a given URL \cite{energy-gateway:github}. We used this component in our \texttt{main.c} file to check for updates periodically and perform them if available.
-
-% TODO: Make figure reference better
-The firmware image was hosted on a web server \ref{fig:web_server}. The web server was configured to serve the firmware image over HTTPS. The URL of the firmware image was then passed to the \texttt{energy\_gateway\_ota} component, which downloaded the image and verified its integrity. The component then activated the new firmware image by setting the boot partition to the OTA app slot that was not previously selected for booting. The component then rebooted the device, which would then boot into the new firmware image.
-
-This also enables the possiblity for rollback to a previous firmware image in the event of a failed update \cite{espressif:esp-idf-programming-guide}. The \texttt{energy\_gateway\_ota} component stores the current firmware image version in the \texttt{ota\_data} partition. If the new firmware image fails to boot, the component could automatically rollback to the previous firmware image. This rollback functionality was not implemented in our project.
+The OTA update system was developed to allow for remote firmware updates of the ESP32 board via a Wi-Fi connection. To implement this functionality, the partition table of the device was configured with at least two "OTA app slot" partitions and an "OTA Data Partition". An esp-idf component, \texttt{energy\_gateway\_ota}, was created to handle the initialization, download, verification, and activation of new firmware images from a given URL. This component was integrated into the \texttt{main.c} file to periodically check for updates and perform them if available. The firmware image was hosted on a web server configured to serve the firmware image over HTTPS (refer to Figure \ref{fig:web_server}). The \texttt{energy\_gateway\_ota} component downloaded and verified the integrity of the firmware image and activated it by setting the boot partition to the OTA app slot that was not previously selected for booting. The system also enables the possibility for rollback to a previous firmware image in the event of a failed update.
 
 \subsection{UART communication}
 

@@ -7,8 +7,26 @@
 \subsection{Evaluation}
 \label{sec:evaluation}
 
+We have successfully implemented and integrated three key features into the Energy Gateway. These features include WiFi provisioning through Bluetooth, OTA updates, and UART communication.
+
+Our WiFi provisioning through Bluetooth feature allows for streamlined configuration of WiFi credentials on ESP32 devices using a BLE-enabled device, such as a smartphone. This feature provides a more efficient and secure method of communication between devices in the realm of IoT, making it a valuable addition to the Energy Gateway system.
+
+The OTA update feature enables remote firmware updates of the ESP32 board via a Wi-Fi connection, eliminating the need for a physical connection. This feature allows for the easy deployment of updates to the Energy Gateway system, even when it is deployed in hard-to-reach locations. We have also implemented a versioning system based on git tags to ensure that only new firmware images are updated and avoid updating the firmware to an older version.
+
+Our UART communication feature allows the Energy Gateway system to poll and send data to serial devices. We have successfully established a UART connection between the ESP32 microcontroller and a Heltec Wireless Stick, which simulates the behavior of a serial device. We have also tested the system's performance under stress conditions, which helps ensure that the feature functions reliably in the final Energy Gateway product.
+
+In terms of the results, our work has shown that the features have been successfully implemented and tested. The WiFi provisioning through Bluetooth feature simplifies the process of configuring WiFi credentials on ESP32 devices and enhances security by using BLE-enabled devices. The OTA update feature eliminates the need for a physical connection and allows for easy deployment of updates to the Energy Gateway system, while the UART communication feature provides the capability to poll and send data to serial devices.
+
+Overall, our work on the Energy Gateway system has resulted in a more efficient and capable product that can effectively monitor and control energy consumption in a building. The features implemented have the potential to enhance the usability and security of the system and enable easy deployment of updates, which is critical in the realm of IoT. We have also demonstrated our ability to program with the ESP-IDF framework and utilize the FreeRTOS real-time operating system effectively.
+
 \subsubsection{Explanation}
 \label{sec:explanation}
+
+Our work on implementing three key features into the Energy Gateway has shown successful results. The WiFi provisioning through Bluetooth feature, which enables streamlined configuration of WiFi credentials on ESP32 devices, is a valuable addition to the Energy Gateway system. Previous research has shown that Bluetooth Low Energy (BLE) is a low-power communication protocol that is commonly used in IoT devices due to its low energy consumption and high security features //TODO: Add reference. The implementation of BLE in our system enhances security and improves the efficiency of communication between devices.
+
+The OTA update feature, which enables remote firmware updates of the ESP32 board via a Wi-Fi connection, eliminates the need for a physical connection and simplifies the process of updating the system. Previous research has shown that OTA updates are critical for ensuring the security and reliability of IoT systems, as they allow for easy deployment of updates and patches to address vulnerabilities TODO: Add reference. Our implementation of OTA updates in the Energy Gateway system is an important step towards ensuring the security and reliability of the system.
+
+The UART communication feature, which enables the Energy Gateway system to poll and send data to serial devices, is another important addition to the system. Previous research has shown that UART communication is a common method used in IoT systems for inter-device communication due to its simplicity and reliability TODO: Add reference. Our successful implementation of UART communication in the Energy Gateway system shows that we are well-versed in the fundamental principles of IoT communication protocols.
 
 \subsubsection{Limitations and possible sources of errors}
 \label{sec:limitations}

@@ -53,6 +53,10 @@ This also enables the possiblity for rollback to a previous firmware image in th
   \label{fig:uart_connection}
 \end{figure}
 
+The Energy Gateway's final product requires the capability to poll from and send data to serial devices. To fulfill this requirement, we utilized the UART (Universal Asynchronous Receiver/Transmitter) protocol, which enables asynchronous communication between two devices in a full-duplex manner. The UART protocol is widely utilized in embedded systems, like the ESP32, to interface with sensors and actuators.
+
+To simulate the UART protocol, we established a Heltec Wireless Stick as a serial device and connected it to the ESP32 module via UART (refer to Figure \ref{fig:uart_connection}). We programmed the ESP32 module to request data from the Heltec Wireless Stick at a rate of 20Hz, while the Heltec Wireless Stick was programmed to transmit a random number between 0 and 255 to the ESP32 module every 50ms. The ESP32 module then evaluated whether the received data was too high or low. If the data was deemed too low, a 0 was dispatched to the Heltec Wireless Stick, and if it was too high, a 1 was transmitted. Our solution passed our testing and in the final Energy Gateway product, the ESP32 module will acquire data from the serial device only at a rate of 2Hz.
+
 \subsection{Concurrency}
 
 When it comes to developing software with the Espressif IoT Development Framework (ESP-IDF), understanding the intricacies of priority levels is paramount for effective task management~\cite{Davis:2016}. The underlying operating system for ESP-IDF is FreeRTOS, which is a real-time operating system designed for microcontrollers that provides a multitasking environment for running multiple tasks simultaneously on a single processor. The priority-based preemptive scheduling algorithm employed by FreeRTOS is an essential feature that allows for efficient task management~\cite{espressif:esp-idf-programming-guide}.

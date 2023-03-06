@@ -30,3 +30,13 @@ The UART communication feature, which enables the Energy Gateway system to poll 
 
 \subsubsection{Limitations and possible sources of errors}
 \label{sec:limitations}
+
+While conducting our experiments, we conducted stress tests only for the UART communication feature, and limited testing was done on the WiFi provisioning through Bluetooth feature and the OTA update feature. Further investigation is necessary under different environmental and usage conditions, to provide a comprehensive evaluation of the performance of these features and uncover any possible sources of error.
+
+Our current implementation of the versioning system, based on git tags, was limited to ensuring that the firmware is not updated to the same version. Future studies could look into creating a more sophisticated versioning system capable of handling more complex scenarios. One approach could be to create a versioning system that ensures that the device never reverts to an older version of the firmware.
+
+An additional enhancement that could be made to the OTA update feature is the implementation of a rollback mechanism that permits the device to revert to the previous version of the firmware in the event of an update failure. This would ensure that the device always runs a stable version of the firmware. The older version of the firmware is already stored on the device, but we were unable to implement the rollback mechanism due to time constraints.
+
+The replacement of the device's entire binary each time a component is updated is a potential source of error, as the new binary could become corrupt. To minimize the possibility of the device being left inoperable, each component update could override only its own component binary, thereby necessitating that the device only update the binary of that component. We have yet to conduct an in-depth analysis of this approach's feasibility, but it is a topic that could be researched further in the future.
+
+In conclusion, although our project has successfully developed and validated key features for the Energy Gateway system, certain limitations and potential sources of error must be considered. More comprehensive testing and improvements are required to increase the reliability and performance of these features.

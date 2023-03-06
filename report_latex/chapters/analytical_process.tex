@@ -46,6 +46,13 @@ This also enables the possiblity for rollback to a previous firmware image in th
 
 \subsubsection{UART communication}
 
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.8\linewidth]{figures/uart_connection.png}
+  \caption{UART connection scheme}
+  \label{fig:uart_connection}
+\end{figure}
+
 \subsection{Concurrency}
 
 When it comes to developing software with the Espressif IoT Development Framework (ESP-IDF), understanding the intricacies of priority levels is paramount for effective task management~\cite{Davis:2016}. The underlying operating system for ESP-IDF is FreeRTOS, which is a real-time operating system designed for microcontrollers that provides a multitasking environment for running multiple tasks simultaneously on a single processor. The priority-based preemptive scheduling algorithm employed by FreeRTOS is an essential feature that allows for efficient task management~\cite{espressif:esp-idf-programming-guide}.
@@ -84,3 +91,34 @@ When the data had been received and the buffer checked for the correct value, th
 \end{figure}
 
 \subsubsection{Concurrency}
+
+\begin{table}[ht]
+  \centering
+  \caption{Task priority levels}
+  \label{table:task-priorities}
+  \begin{tabularx}{\textwidth}{p{1cm}Xp{10cm}}
+    \hline
+    \textbf{Priority} & \textbf{Example task} & \textbf{Description} \\ 
+    \hline
+    0 & \texttt{IDLE} & Idle tasks. \\
+    \hline
+    1 & \texttt{app\_main} & These are the tasks we prioritize the least.\\
+    \hline
+    2 & \texttt{ota\_task} & Tasks in this priority are prioritized very low.\\
+    \hline
+    18 & \texttt{tcpip\_task} & Important border. Tasks with higher priority than this can not be guaranteed to perform network operations as its possible they will override the TCP/IP stack. \\
+    \hline
+    19 & \texttt{uart\_task} & Using priority 19 or higher will guarantee an application task can run on Core 1 without being preempted by any built-in task\cite{espressif:esp-idf-programming-guide}. \\
+    \hline
+    20 & \texttt{event\_task} & The event handling system task to manage the default system event loop and execute callbacks. \\
+    \hline
+    22 & \texttt{esptimer\_task} & High Resolution Timer (ESP Timer) system task to manage high precision timer events and execute callbacks. \\
+    \hline
+    25 & \texttt{none} & Max Priority \\
+    \hline
+  \end{tabularx}
+\end{table}
+
+First task thats creates is the UART task, which is given a priority of 19. This task is responsible for receiving data from the Wireless Stick and sending data back to the Wireless Stick. The task is given a priority of 19 to ensure that it is not preempted by any other tasks. The task is then put into a while loop, where it waits for data to be received. When data is received, the task checks if the data is greater than 250 or less than 5. If the data is greater than 250, the task sends a value of 1 back to the Wireless Stick. If the data is less than 5, the task sends a value of 0 back to the Wireless Stick. The task then yields for 10 milliseconds, using \texttt{vTaskDelay(10 / portTICK\_PERIOD\_MS);}.
+
+After the UART task is created, the OTA task is created. This task is given a priority of 2. This task is responsible for checking for new firmware images and updating the firmware image if a new one is available. The task is given a priority of 2 to ensure that it does not preemp any other tasks. After the task has been run once its removed from the task list, a timer is started that will run the task again after 24 hours. When the timer expires, the task is once again placed in the task list, on a low priority of 2.

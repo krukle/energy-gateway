@@ -8,15 +8,13 @@
 The Energy Gateway system consists of the following hardware components:
 
 \begin{itemize}
-  \item ESP32 devkit board
+  \item ESP32 devkit v1
   \item Heltec Wireless Stick
-  \item Breadboard
-  \item Connecting wires
 \end{itemize}
 
-The ESP32 devkit board is a low-cost microcontroller board that is based on the ESP32 microcontroller. It was chosen due to its low cost, integrated Wi-Fi and Bluetooth capabilities~\cite{platformio:esp32-devkitv1}.
+The ESP32 devkit v1 board is a low-cost microcontroller board that is based on the ESP-VROOM-32 microcontroller. At the core of the microcontroller is the ESP32-D0WDQ6 chip, it is a microprocessor that contains two low-power Xtensa 32-bit LX6 microprocessors. It has 448 KB of ROM for booting and core functions, 520 KB of on-chip SRAM for data and instructions and 16 KB of SRAM in RTC.~\cite{espressif:esp32_datasheet}. Other features include, 802.11 b/g/n Wi-Fi, Bluetooth v4.2 BR/EDR and BLE and 38 pins with interfaces like UART, ADC and DAC. The software used to program the ESP32 devkit v1 board is the ESP-IDF (Espressif IoT Development Framework) which is a free and open-source software development framework for the ESP32 chip and based on FreeRTOS.~\cite{espressif:esp-idf-programming-guide}.
 
-Any device could have been used to simulate a serial device, but the Heltec Wireless Stick was chosen due to availability and ease of use.
+The external input device used is the Heltec Wireless Stick. It runs Micropython and is used to send and receive data to and from the ESP32 module. The Wireless Stick is accessed through a serial connection using the UART interface (refer to Figure \ref{fig:uart_connection}). The same device is also used for the output of the system, receiving data from the ESP32 when the ESP32 has received a value above or below a certain threshold.
 
 \subsection{WiFi Provisioning through Bluetooth}
 

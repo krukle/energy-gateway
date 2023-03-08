@@ -1,8 +1,8 @@
-menu "Energy Gateway UART Configuration"
+menu "Energy Gateway - UART Configuration"
 
   # orsource "$IDF_PATH/examples/common_components/env_caps/$IDF_TARGET/Kconfig.env_caps"
 
-  config EXAMPLE_UART_PORT_NUM
+  config UART_PORT_NUM
       int "UART port number"
       # range 0 2 if IDF_TARGET_ESP32 || IDF_TARGET_ESP32S3
       # default 2 if IDF_TARGET_ESP32 || IDF_TARGET_ESP32S3
@@ -14,7 +14,7 @@ menu "Energy Gateway UART Configuration"
           UART communication port number for the example.
           See UART documentation for available port numbers.
 
-  config EXAMPLE_UART_BAUD_RATE
+  config UART_BAUD_RATE
       int "UART communication speed"
       range 1200 115200
       default 15200
@@ -22,7 +22,7 @@ menu "Energy Gateway UART Configuration"
       help
           UART communication speed for Modbus example.
 
-  config EXAMPLE_UART_RXD
+  config UART_RXD
       int "UART RXD pin number"
       range ENV_GPIO_RANGE_MIN ENV_GPIO_IN_RANGE_MAX
       default 16
@@ -31,7 +31,7 @@ menu "Energy Gateway UART Configuration"
           GPIO number for UART RX pin. See UART documentation for more information
           about available pin numbers for UART.
 
-  config EXAMPLE_UART_TXD
+  config UART_TXD
       int "UART TXD pin number"
       range ENV_GPIO_RANGE_MIN ENV_GPIO_OUT_RANGE_MAX
       default 17
@@ -40,11 +40,35 @@ menu "Energy Gateway UART Configuration"
           GPIO number for UART TX pin. See UART documentation for more information
           about available pin numbers for UART.
 
-  config EXAMPLE_TASK_STACK_SIZE
+  config TASK_STACK_SIZE
       int "Energy Gateway UART stack size"
       range 1024 16384
       default 2048
       help
           Defines stack size for Energy Gateway UART. Insufficient stack size can cause crash.
+    
+    config ENV_GPIO_RANGE_MIN
+        int "GPIO range min"
+        default 0
+        help
+            Defines GPIO range min for Energy Gateway UART.
+
+    config ENV_GPIO_RANGE_MAX
+        int "GPIO range max"
+        default 39
+        help
+            Defines GPIO range max for Energy Gateway UART.
+
+    config ENV_GPIO_IN_RANGE_MAX
+        int "GPIO in range max"
+        default 39
+        help
+            Defines GPIO in range max for Energy Gateway UART.
+
+    config ENV_GPIO_OUT_RANGE_MAX
+        int "GPIO out range max"
+        default 33
+        help
+            Defines GPIO out range max for Energy Gateway UART.
 
 endmenu

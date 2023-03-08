@@ -15,7 +15,6 @@
 #include "nvs.h"
 #include "nvs_flash.h"
 #include "esp_wifi.h"
-#include "protocol_examples_common.h"
 #include "wifi_provisioning/manager.h"
 #include "wifi_provisioning/scheme_ble.h"
 

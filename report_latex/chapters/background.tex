@@ -25,7 +25,7 @@ The Energy Gateway's final product requires the capability to poll from and send
 
 \subsubsection{Concurrency}
 \label{subsec:concurrency}
-Efficient task management is crucial when developing software using the Espressif IoT Development Framework (ESP-IDF). The underlying operating system for ESP-IDF is FreeRTOS, which is a real-time operating system designed for microcontrollers that provides a multitasking environment for running multiple tasks simultaneously on a single processor. One essential feature of FreeRTOS is the priority-based preemptive scheduling algorithm that allows for efficient task management. ESP-IDF utilizes a range of 26 priority levels, numbered from 0 (lowest) to 25 (highest), which developers can use to optimize system performance and ensure that critical tasks receive the necessary resources to execute efficiently (refer to Table \ref{table:task-priorities}). Understanding the criticality and potential impact of a task on the system is crucial in selecting an appropriate priority level.
+Efficient task management is crucial when developing software using the Espressif IoT Development Framework (ESP-IDF). The underlying operating system for ESP-IDF is FreeRTOS, which is a real-time operating system designed for microcontrollers that provides a multitasking environment for running multiple tasks simultaneously on a single processor. One essential feature of FreeRTOS is the priority-based preemptive scheduling algorithm that allows for efficient task management. ESP-IDF utilizes a range of 26 priority levels, numbered from 0 (lowest) to 25 (highest), which developers can use to optimize system performance and ensure that critical tasks receive the necessary resources to execute efficiently (refer to Table \ref{table:task-priorities}). Understanding the criticality and potential impact of a task on the system is crucial in selecting an appropriate priority level~\cite{Davis:2016}.
 
 \subsection{Social background}
 \label{sec:social}
@@ -33,4 +33,4 @@ The increasing popularity of IoT devices has led to a growing demand for systems
 
 \subsection{Previous research}
 \label{sec:previous}
-The project will build on previous research into OTA updates and Wi-Fi provisioning for ESP32 devices \cite{espressif:esp-idf-programming-guide}.
+The project will build on previous work into OTA updates and Wi-Fi provisioning for ESP32 devices \cite{espressif:esp-idf-programming-guide}. While previous work has focused on individual components ot these processes, the present project combines these features using ESP-IDF components with the additional capability of reading from an external device using UART communication.

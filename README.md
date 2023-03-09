@@ -1,1 +1,7 @@
-# energy-gateway
+# Energy Gateway
+
+In this project, we have implemented and integrated three key features into the Energy Gateway system, which is a microcontroller-based device designed to help stabilize the power grid. These features include WiFi provisioning through Bluetooth, OTA updates, and UART communication. We have successfully tested these features and demonstrated their potential to enhance the usability and security of the Energy Gateway system, as well as facilitate easy deployment of updates.
+
+However, our work has also identified limitations and possible sources of error that should be taken into consideration. Further testing and improvements could enhance the reliability and performance of the features implemented in the Energy Gateway system. Future research could investigate the implementation of a more robust versioning system, as well as the possibility of implementing a rollback mechanism for OTA updates. Additionally, exploring the feasibility of updating individual component binaries instead of the entire device binary could reduce the risk of the device being left in an unusable state.
+
+Overall, our project has contributed to the development of a more efficient and capable Energy Gateway system, with potential implications for enhancing the stability of the power grid. The features implemented in this project have the potential to enhance the usability and security of IoT devices, as well as enable easy deployment of updates, which is critical in the realm of IoT.

@@ -19,7 +19,6 @@
 #include "esp_https_ota.h"
 #include "nvs.h"
 #include "nvs_flash.h"
-#include "protocol_examples_common.h"
 
 #if CONFIG_BOOTLOADER_APP_ANTI_ROLLBACK
 #include "esp_efuse.h"
@@ -81,22 +80,22 @@ start:
 
     esp_err_t ota_finish_err = ESP_OK;
     esp_http_client_config_t config = {
-        .url = CONFIG_EXAMPLE_FIRMWARE_UPGRADE_URL,
+        .url = CONFIG_OTA_FIRMWARE_UPGRADE_URL,
         .cert_pem = (char *)server_cert_pem_start,
-        .timeout_ms = CONFIG_EXAMPLE_OTA_RECV_TIMEOUT,
+        .timeout_ms = CONFIG_OTA_RECV_TIMEOUT,
         .keep_alive_enable = true,
     };
 
-#ifdef CONFIG_EXAMPLE_SKIP_COMMON_NAME_CHECK
+#ifdef CONFIG_OTA_SKIP_COMMON_NAME_CHECK
     config.skip_cert_common_name_check = true;
 #endif
 
     esp_https_ota_config_t ota_config = {
         .http_config = &config,
         .http_client_init_cb = _http_client_init_cb, // Register a callback to be invoked after esp_http_client is initialized
-#ifdef CONFIG_EXAMPLE_ENABLE_PARTIAL_HTTP_DOWNLOAD
+#ifdef CONFIG_OTA_ENABLE_PARTIAL_HTTP_DOWNLOAD
         .partial_http_download = true,
-        .max_http_request_size = CONFIG_EXAMPLE_HTTP_REQUEST_SIZE,
+        .max_http_request_size = CONFIG_OTA_HTTP_REQUEST_SIZE,
 #endif
     };
 
@@ -113,7 +112,7 @@ start:
         ESP_LOGE(TAG, "esp_https_ota_read_img_desc failed");
         goto ota_end;
     }
-    // TODO: Image header verification fails whenver the version number is the same.
+    // Image header verification fails whenver the version number is the same. Should it be an error?
     err = validate_image_header(&app_desc);
     if (err != ESP_OK) {
         ESP_LOGE(TAG, "image header verification failed");
@@ -132,20 +131,16 @@ start:
     }
 
     if (esp_https_ota_is_complete_data_received(https_ota_handle) != true) {
-        // the OTA image was not completely received and user can customise the response to this situation.
         ESP_LOGE(TAG, "Complete data was not received.");
     } else {
-        // TODO: Make sure this is not interrupted by other tasks.
-        // taskENTER_CRITICAL(pvParameters);
         ota_finish_err = esp_https_ota_finish(https_ota_handle);
-        // taskEXIT_CRITICAL(pvParameters);
         if ((err == ESP_OK) && (ota_finish_err == ESP_OK)) {
             ESP_LOGI(TAG, "ESP_HTTPS_OTA upgrade successful. Rebooting ...");
             vTaskDelay(1000 / portTICK_PERIOD_MS);
             esp_restart();
         } else {
             if (ota_finish_err == ESP_ERR_OTA_VALIDATE_FAILED) {
-                // TODO: Send a message to server to indicate that the image is corrupted.
+                // Maybe send a message to the server to indicate that the image is corrupted?
                 ESP_LOGE(TAG, "Image validation failed, image is corrupted");
             }
             ESP_LOGE(TAG, "ESP_HTTPS_OTA upgrade failed 0x%x", ota_finish_err);

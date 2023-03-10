@@ -30,10 +30,10 @@
 
 static const char *TAG = "energy_gateway_provisioning";
 
-#if CONFIG_EXAMPLE_PROV_SECURITY_VERSION_2
-#if CONFIG_EXAMPLE_PROV_SEC2_DEV_MODE
-#define EXAMPLE_PROV_SEC2_USERNAME          "wifiprov"
-#define EXAMPLE_PROV_SEC2_PWD               "abcd1234"
+#if CONFIG_PROV_SECURITY_VERSION_2
+#if CONFIG_PROV_SEC2_DEV_MODE
+#define PROV_SEC2_USERNAME          "wifiprov"
+#define PROV_SEC2_PWD               "abcd1234"
 
 /* This salt,verifier has been generated for username = "wifiprov" and password = "abcd1234"
  * IMPORTANT NOTE: For production cases, this must be unique to every device
@@ -71,24 +71,24 @@ static const char sec2_verifier[] = {
 #endif
 
 static esp_err_t example_get_sec2_salt(const char **salt, uint16_t *salt_len) {
-#if CONFIG_EXAMPLE_PROV_SEC2_DEV_MODE
+#if CONFIG_PROV_SEC2_DEV_MODE
     ESP_LOGI(TAG, "Development mode: using hard coded salt");
     *salt = sec2_salt;
     *salt_len = sizeof(sec2_salt);
     return ESP_OK;
-#elif CONFIG_EXAMPLE_PROV_SEC2_PROD_MODE
+#elif CONFIG_PROV_SEC2_PROD_MODE
     ESP_LOGE(TAG, "Not implemented!");
     return ESP_FAIL;
 #endif
 }
 
 static esp_err_t example_get_sec2_verifier(const char **verifier, uint16_t *verifier_len) {
-#if CONFIG_EXAMPLE_PROV_SEC2_DEV_MODE
+#if CONFIG_PROV_SEC2_DEV_MODE
     ESP_LOGI(TAG, "Development mode: using hard coded verifier");
     *verifier = sec2_verifier;
     *verifier_len = sizeof(sec2_verifier);
     return ESP_OK;
-#elif CONFIG_EXAMPLE_PROV_SEC2_PROD_MODE
+#elif CONFIG_PROV_SEC2_PROD_MODE
     /* This code needs to be updated with appropriate implementation to provide verifier */
     ESP_LOGE(TAG, "Not implemented!");
     return ESP_FAIL;
@@ -112,7 +112,7 @@ static EventGroupHandle_t ble_event_group;
 static void event_handler(void* arg, esp_event_base_t event_base,
                           int32_t event_id, void* event_data)
 {
-#ifdef CONFIG_EXAMPLE_RESET_PROV_MGR_ON_FAILURE
+#ifdef CONFIG_RESET_PROV_MGR_ON_FAILURE
     static int retries;
 #endif
     if (event_base == WIFI_PROV_EVENT) {
@@ -134,9 +134,9 @@ static void event_handler(void* arg, esp_event_base_t event_base,
                          "\n\tPlease reset to factory and retry provisioning",
                          (*reason == WIFI_PROV_STA_AUTH_ERROR) ?
                          "Wi-Fi station authentication failed" : "Wi-Fi access-point not found");
-#ifdef CONFIG_EXAMPLE_RESET_PROV_MGR_ON_FAILURE
+#ifdef CONFIG_RESET_PROV_MGR_ON_FAILURE
                 retries++;
-                if (retries >= CONFIG_EXAMPLE_PROV_MGR_MAX_RETRY_CNT) {
+                if (retries >= CONFIG_PROV_MGR_MAX_RETRY_CNT) {
                     ESP_LOGI(TAG, "Failed to connect with provisioned AP, reseting provisioned credentials");
                     wifi_prov_mgr_reset_sm_state_on_failure();
                     retries = 0;
@@ -146,7 +146,7 @@ static void event_handler(void* arg, esp_event_base_t event_base,
             }
             case WIFI_PROV_CRED_SUCCESS:
                 ESP_LOGI(TAG, "Provisioning successful");
-#ifdef CONFIG_EXAMPLE_RESET_PROV_MGR_ON_FAILURE
+#ifdef CONFIG_RESET_PROV_MGR_ON_FAILURE
                 retries = 0;
 #endif
                 break;
@@ -219,11 +219,11 @@ static void wifi_prov_print_qr(const char *name, const char *username, const cha
     }
     char payload[150] = {0};
     if (pop) {
-#if CONFIG_EXAMPLE_PROV_SECURITY_VERSION_1
+#if CONFIG_PROV_SECURITY_VERSION_1
         snprintf(payload, sizeof(payload), "{\"ver\":\"%s\",\"name\":\"%s\"" \
                     ",\"pop\":\"%s\",\"transport\":\"%s\"}",
                     PROV_QR_VERSION, name, pop, transport);
-#elif CONFIG_EXAMPLE_PROV_SECURITY_VERSION_2
+#elif CONFIG_PROV_SECURITY_VERSION_2
         snprintf(payload, sizeof(payload), "{\"ver\":\"%s\",\"name\":\"%s\"" \
                     ",\"username\":\"%s\",\"pop\":\"%s\",\"transport\":\"%s\"}",
                     PROV_QR_VERSION, name, username, pop, transport);
@@ -233,7 +233,7 @@ static void wifi_prov_print_qr(const char *name, const char *username, const cha
                     ",\"transport\":\"%s\"}",
                     PROV_QR_VERSION, name, transport);
     }
-#ifdef CONFIG_EXAMPLE_PROV_SHOW_QR
+#ifdef CONFIG_PROV_SHOW_QR
     ESP_LOGI(TAG, "Scan this QR code from the provisioning application for Provisioning.");
     esp_qrcode_config_t cfg = ESP_QRCODE_CONFIG_DEFAULT();
     esp_qrcode_generate(&cfg, payload);
@@ -270,9 +270,9 @@ void start_provisioning(void *pvParameters)
 
     /* Initialize Wi-Fi including netif with default config */
     esp_netif_create_default_wifi_sta();
-#ifdef CONFIG_EXAMPLE_PROV_TRANSPORT_SOFTAP
+#ifdef CONFIG_PROV_TRANSPORT_SOFTAP
     esp_netif_create_default_wifi_ap();
-#endif /* CONFIG_EXAMPLE_PROV_TRANSPORT_SOFTAP */
+#endif /* CONFIG_PROV_TRANSPORT_SOFTAP */
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
     ESP_ERROR_CHECK(esp_wifi_init(&cfg));
 
@@ -280,12 +280,12 @@ void start_provisioning(void *pvParameters)
     wifi_prov_mgr_config_t config = {
         /* What is the Provisioning Scheme that we want ?
          * wifi_prov_scheme_softap or wifi_prov_scheme_ble */
-#ifdef CONFIG_EXAMPLE_PROV_TRANSPORT_BLE
+#ifdef CONFIG_PROV_TRANSPORT_BLE
         .scheme = wifi_prov_scheme_ble,
-#endif /* CONFIG_EXAMPLE_PROV_TRANSPORT_BLE */
-#ifdef CONFIG_EXAMPLE_PROV_TRANSPORT_SOFTAP
+#endif /* CONFIG_PROV_TRANSPORT_BLE */
+#ifdef CONFIG_PROV_TRANSPORT_SOFTAP
         .scheme = wifi_prov_scheme_softap,
-#endif /* CONFIG_EXAMPLE_PROV_TRANSPORT_SOFTAP */
+#endif /* CONFIG_PROV_TRANSPORT_SOFTAP */
 
         /* Any default scheme specific event handler that you would
          * like to choose. Since our example application requires
@@ -295,12 +295,12 @@ void start_provisioning(void *pvParameters)
          * appropriate scheme specific event handler allows the manager
          * to take care of this automatically. This can be set to
          * WIFI_PROV_EVENT_HANDLER_NONE when using wifi_prov_scheme_softap*/
-#ifdef CONFIG_EXAMPLE_PROV_TRANSPORT_BLE
+#ifdef CONFIG_PROV_TRANSPORT_BLE
         .scheme_event_handler = WIFI_PROV_SCHEME_BLE_EVENT_HANDLER_FREE_BTDM
-#endif /* CONFIG_EXAMPLE_PROV_TRANSPORT_BLE */
-#ifdef CONFIG_EXAMPLE_PROV_TRANSPORT_SOFTAP
+#endif /* CONFIG_PROV_TRANSPORT_BLE */
+#ifdef CONFIG_PROV_TRANSPORT_SOFTAP
         .scheme_event_handler = WIFI_PROV_EVENT_HANDLER_NONE
-#endif /* CONFIG_EXAMPLE_PROV_TRANSPORT_SOFTAP */
+#endif /* CONFIG_PROV_TRANSPORT_SOFTAP */
     };
 
     /* Initialize provisioning manager with the
@@ -308,7 +308,7 @@ void start_provisioning(void *pvParameters)
     ESP_ERROR_CHECK(wifi_prov_mgr_init(config));
 
     bool provisioned = false;
-#ifdef CONFIG_EXAMPLE_RESET_PROVISIONED
+#ifdef CONFIG_RESET_PROVISIONED
     wifi_prov_mgr_reset_provisioning();
 #else
     /* Let's find out if the device is provisioned */
@@ -327,7 +327,7 @@ void start_provisioning(void *pvParameters)
         char service_name[12];
         get_device_service_name(service_name, sizeof(service_name));
 
-#ifdef CONFIG_EXAMPLE_PROV_SECURITY_VERSION_1
+#ifdef CONFIG_PROV_SECURITY_VERSION_1
         /* What is the security level that we want (0, 1, 2):
          *      - WIFI_PROV_SECURITY_0 is simply plain text communication.
          *      - WIFI_PROV_SECURITY_1 is secure communication which consists of secure handshake
@@ -351,17 +351,17 @@ void start_provisioning(void *pvParameters)
 
         const char *username  = NULL;
 
-#elif CONFIG_EXAMPLE_PROV_SECURITY_VERSION_2
+#elif CONFIG_PROV_SECURITY_VERSION_2
         wifi_prov_security_t security = WIFI_PROV_SECURITY_2;
         /* The username must be the same one, which has been used in the generation of salt and verifier */
 
-#if CONFIG_EXAMPLE_PROV_SEC2_DEV_MODE
+#if CONFIG_PROV_SEC2_DEV_MODE
         /* This pop field represents the password that will be used to generate salt and verifier.
          * The field is present here in order to generate the QR code containing password.
          * In production this password field shall not be stored on the device */
-        const char *username  = EXAMPLE_PROV_SEC2_USERNAME;
-        const char *pop = EXAMPLE_PROV_SEC2_PWD;
-#elif CONFIG_EXAMPLE_PROV_SEC2_PROD_MODE
+        const char *username  = PROV_SEC2_USERNAME;
+        const char *pop = PROV_SEC2_PWD;
+#elif CONFIG_PROV_SEC2_PROD_MODE
         /* The username and password shall not be embedded in the firmware,
          * they should be provided to the user by other means.
          * e.g. QR code sticker */
@@ -388,7 +388,7 @@ void start_provisioning(void *pvParameters)
          */
         const char *service_key = NULL;
 
-#ifdef CONFIG_EXAMPLE_PROV_TRANSPORT_BLE
+#ifdef CONFIG_PROV_TRANSPORT_BLE
         /* This step is only useful when scheme is wifi_prov_scheme_ble. This will
          * set a custom 128 bit UUID which will be included in the BLE advertisement
          * and will correspond to the primary GATT service that provides provisioning
@@ -409,7 +409,7 @@ void start_provisioning(void *pvParameters)
          * forgotten to enable the BT stack or BTDM BLE settings in the SDK (e.g. see
          * the sdkconfig.defaults in the example project) */
         wifi_prov_scheme_ble_set_service_uuid(custom_service_uuid);
-#endif /* CONFIG_EXAMPLE_PROV_TRANSPORT_BLE */
+#endif /* CONFIG_PROV_TRANSPORT_BLE */
 
         /* An optional endpoint that applications can create if they expect to
          * get some additional custom data during provisioning workflow.
@@ -433,19 +433,14 @@ void start_provisioning(void *pvParameters)
         // wifi_prov_mgr_wait();
         // wifi_prov_mgr_deinit();
         /* Print QR code for provisioning */
-#ifdef CONFIG_EXAMPLE_PROV_TRANSPORT_BLE
+#ifdef CONFIG_PROV_TRANSPORT_BLE
         wifi_prov_print_qr(service_name, username, pop, PROV_TRANSPORT_BLE);
-#else /* CONFIG_EXAMPLE_PROV_TRANSPORT_SOFTAP */
+#else /* CONFIG_PROV_TRANSPORT_SOFTAP */
         wifi_prov_print_qr(service_name, username, pop, PROV_TRANSPORT_SOFTAP);
-#endif /* CONFIG_EXAMPLE_PROV_TRANSPORT_BLE */
+#endif /* CONFIG_PROV_TRANSPORT_BLE */
     } else {
         ESP_LOGI(TAG, "Already provisioned, starting Wi-Fi STA");
-
-        /* We don't need the manager as device is already provisioned,
-         * so let's release it's resources */
         wifi_prov_mgr_deinit();
-
-        /* Start Wi-Fi station */
         wifi_init_sta();
     }
 
